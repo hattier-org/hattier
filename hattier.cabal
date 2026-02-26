@@ -35,8 +35,10 @@ library
 
   build-depends:
     , base
-    , mtl   ^>=2.3.2
-    , text  ^>=2.1.4
+    , dhall             ^>=1.42.3
+    , mtl               ^>=2.3.2
+    , optparse-generic  ^>=1.5.2
+    , text              ^>=2.1.4
 
 executable hattier
   import:         defaults

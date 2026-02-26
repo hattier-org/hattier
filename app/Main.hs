@@ -2,13 +2,21 @@ module Main (main) where
 
 import Format
 import Types
+import Dhall (input, auto)
+import Options.Generic
 
 main :: IO ()
 main = do
   --------------------------
   --- Read configuration ---
   --------------------------
-  let config = Config 2 80
+  flags <- unwrapRecord "<hattier3"
+  dhall <- input auto "./config.dhall"
+
+  putStrLn "Flags config:" >> print (flags :: Config Unwrapped)
+  putStrLn "Dhall config:" >> print (dhall :: Config Unwrapped)
+
+  let config = undefined
 
   -----------------------------------
   --- Read source files to format ---
