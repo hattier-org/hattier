@@ -19,41 +19,48 @@ maintainer:
 category:      Development
 build-type:    Simple
 
-common warnings
-  ghc-options: -Wall
+common defaults
+  ghc-options:        -Wall
+  default-language:   Haskell2010
+  default-extensions:
+    ImportQualifiedPost
+    OverloadedStrings
 
 library
-  import:           warnings
-  exposed-modules:  Parser
+  import:          defaults
+  hs-source-dirs:  src
+  exposed-modules:
+    Format
+    Parser
+    Types
+
   build-depends:
     , base
     , ghc   ^>=9.10.3
-  hs-source-dirs:   src
-  default-language: Haskell2010
+    , mtl   ^>=2.3.2
+    , text  ^>=2.1.4
 
 executable hattier
-  import:           warnings
-  main-is:          Main.hs
-
-  -- other-modules:
-  -- other-extensions:
-  build-depends:    base
-  hs-source-dirs:   src
-  default-language: Haskell2010
-
-test-suite tests
-  import:           warnings
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
+  import:         defaults
+  hs-source-dirs: app
+  main-is:        Main.hs
   build-depends:
     , base
     , hattier
+
+test-suite hattier-test
+  import:         defaults
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
+  other-modules:  Unit.Format
+  build-depends:
+    , base
     , ghc               ^>=9.10.3
+    , hattier
     , QuickCheck        ^>=2.17.1.0
     , tasty             ^>=1.5.3
+    , tasty-hunit       ^>=0.10.2
     , tasty-quickcheck  ^>=0.11.1
     , tasty-hunit       ^>=0.10.2
     , filepath          ^>=1.5.4.0
-
-  hs-source-dirs:   test
-  default-language: Haskell2010
