@@ -1,19 +1,20 @@
-module Hattier.Format where
+{-# LANGUAGE RecordWildCards #-}
 
+module Hattier.Format
+  ( fmt
+  ) where
+
+import Control.Monad.State (gets, modify)
+import Data.Text as T
+import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Types
-import Control.Monad.Reader (asks)
-import Control.Monad.State  (modify)
-import Data.Text qualified as T
-import Data.Functor         ((<&>))
 
 fmt :: HattierMonad
-fmt = sequence_ [fmtExample {- add your formatters here-} ]
+fmt = sequence_ [fmtWithBuiltinGHC]
 
--- | Only for example purposes; please delete once proper formatters are written; moreover its wrong
-fmtExample :: HattierMonad
-fmtExample = do
-  _indentWidth <- asks indentWidth
-  modify $ \sourceFiles ->
-    sourceFiles <&> \sourceFile ->
-      T.unlines $ T.lines sourceFile <&> \line ->
-        T.replicate _indentWidth " " `T.append` line
+-- | Only for example purposes; please delete once proper formatters are written
+fmtWithBuiltinGHC :: HattierMonad
+fmtWithBuiltinGHC = do
+  ast <- gets parsedModule
+  let output = T.pack . showSDocUnsafe . ppr $ ast
+  modify $ \s -> s {outputText = outputText s <> output}

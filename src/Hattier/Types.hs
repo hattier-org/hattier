@@ -1,20 +1,26 @@
 module Hattier.Types where
 
 import Control.Monad.RWS (RWS, execRWS)
-import Data.Text         (Text)
+import Data.Text (Text)
+import GHC.Hs (GhcPs, HsModule)
 
-{- NOTE(Emilia):
- - Im not actually if we'll need IO here but lets not add it prematurely for now.
- - Please redefine the SourceFiles type once we figure out how to parse things
- -}
-type HattierMonad = RWS Config Log SourceFiles ()
-type SourceFiles  = [Text]
-type Log          = [Text]
+type HattierMonad = RWS Config Log FormatterState ()
 
-execHattier :: HattierMonad -> Config -> SourceFiles -> (SourceFiles, Log)
-execHattier = execRWS
+type Log = [Text]
+
+type HattierModule = HsModule GhcPs
 
 data Config = Config
-  { indentWidth   :: Int
+  { indentWidth :: Int
   , maxLineLength :: Int
   }
+
+data FormatterState = FormatterState
+  { parsedModule :: HattierModule
+  , outputText :: Text -- accumulated formatted text
+  }
+
+execHattier :: HattierMonad -> Config -> FormatterState -> (Text, Log)
+execHattier m config initialState =
+  let (finalState, logs) = execRWS m config initialState
+   in (outputText finalState, logs)

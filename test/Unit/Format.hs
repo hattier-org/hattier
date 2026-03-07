@@ -1,18 +1,43 @@
-module Unit.Format (tests) where
+module Unit.Format
+  ( tests
+  ) where
 
-import Test.Tasty                 (TestTree, testGroup)
-import Test.Tasty.HUnit           (testCase, (@?=))
-import Hattier.Types                      (Config(..), execHattier)
-import Hattier.Format qualified as Format (fmtExample)
+import Data.Text as T hiding (show)
+import Hattier
+import Hattier.Parser
+import Hattier.Types
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.HUnit ((@=?), testCase)
 
 tests :: TestTree
-tests = testGroup "Format tests"
-  [ testCase "example formatter works properly" fmtExample
-  ]
+tests =
+  testGroup
+    "Format tests"
+    [ testCase
+        "formatting with the GHC pretty printer works properly"
+        fmtWithBuiltinGHC
+    ]
 
-fmtExample :: IO ()
-fmtExample = res @?= fst (execHattier Format.fmtExample config sourceFiles)
+fmtWithBuiltinGHC :: IO ()
+fmtWithBuiltinGHC =
+  expectedOutput @=? fst (execHattier hattier config (testState testInput))
   where
-    config      = Config 2 80
-    sourceFiles = ["foo\nbar\n"    , "baz\nhaz\n"    ]
-    res         = ["  foo\n  bar\n", "  baz\n  haz\n"]
+    config = Config 2 80
+    testInput =
+      T.unlines
+        [ "module Example where"
+        , ""
+        , "f :: Bool -> Int"
+        , "f True = 1"
+        , "f False = 2"
+        ]
+    expectedOutput =
+      "module Example where\nf :: Bool -> Int\nf True = 1\nf False = 2"
+
+testState :: Text -> FormatterState
+testState input = FormatterState {parsedModule = ast, outputText = mempty}
+  where
+    ast =
+      case parseTextToAST input defaultParserOpts of
+        Right a -> a
+        Left err -> error $ "test fixture failed to parse: " <> show err
