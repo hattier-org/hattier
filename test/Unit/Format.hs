@@ -3,6 +3,7 @@ module Unit.Format
   ) where
 
 import Data.Text as T hiding (show)
+import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier
 import Hattier.Parser
 import Hattier.Types
@@ -19,8 +20,7 @@ tests =
     ]
 
 fmtWithBuiltinGHC :: IO ()
-fmtWithBuiltinGHC =
-  expectedOutput @=? fst (execHattier hattier config (testState testInput))
+fmtWithBuiltinGHC = expectedOutput @=? actualOutput
   where
     config = Config 2 80
     testInput =
@@ -33,9 +33,11 @@ fmtWithBuiltinGHC =
         ]
     expectedOutput =
       "module Example where\nf :: Bool -> Int\nf True = 1\nf False = 2"
+    ast = fst (execHattier hattier config (testState testInput))
+    actualOutput = T.pack . showSDocUnsafe . ppr $ ast
 
 testState :: Text -> FormatterState
-testState input = FormatterState {parsedModule = ast, outputText = mempty}
+testState input = ast
   where
     ast =
       case parseTextToAST input defaultParserOpts of

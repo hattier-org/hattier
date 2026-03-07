@@ -1,7 +1,7 @@
 module Hattier where
 
 import Hattier.Format (fmt)
-import Hattier.Types (HattierMonad)
+import Hattier.Types (Hattier)
 
-hattier :: HattierMonad
+hattier :: Hattier
 hattier = fmt

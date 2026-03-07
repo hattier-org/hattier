@@ -1,19 +1,17 @@
-module Hattier.Format where
+{-# LANGUAGE RecordWildCards #-}
 
+module Hattier.Format
+  ( fmt
+  ) where
+
+import Control.Monad.State (get, put)
 import Hattier.Types
-import Control.Monad.Reader (asks)
-import Control.Monad.State  (modify)
-import Data.Text qualified as T
-import Data.Functor         ((<&>))
 
-fmt :: HattierMonad
-fmt = sequence_ [fmtExample {- add your formatters here-} ]
+fmt :: Hattier
+fmt = sequence_ [fmtNothing]
 
--- | Only for example purposes; please delete once proper formatters are written; moreover its wrong
-fmtExample :: HattierMonad
-fmtExample = do
-  _indentWidth <- asks indentWidth
-  modify $ \sourceFiles ->
-    sourceFiles <&> \sourceFile ->
-      T.unlines $ T.lines sourceFile <&> \line ->
-        T.replicate _indentWidth " " `T.append` line
+-- | Only for example purposes; please delete once proper formatters are written
+fmtNothing :: Hattier
+fmtNothing = do
+  ast <- get
+  put ast
