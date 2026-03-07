@@ -1,6 +1,6 @@
-module Format where
+module Hattier.Format where
 
-import Types
+import Hattier.Types
 import Control.Monad.Reader (asks)
 import Control.Monad.State  (modify)
 import Data.Text qualified as T

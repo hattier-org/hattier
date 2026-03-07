@@ -2,8 +2,8 @@ module Unit.Format (tests) where
 
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.HUnit           (testCase, (@?=))
-import Types                      (Config(..), execHattier)
-import Format qualified as Format (fmtExample)
+import Hattier.Types                      (Config(..), execHattier)
+import Hattier.Format qualified as Format (fmtExample)
 
 tests :: TestTree
 tests = testGroup "Format tests"

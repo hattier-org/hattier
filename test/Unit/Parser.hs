@@ -6,7 +6,7 @@ import System.FilePath      ((</>))
 import GHC.Types.SrcLoc     (unLoc)
 import GHC.Hs               (hsmodDecls, hsmodName)
 import GHC.Utils.Outputable (ppr, showSDocUnsafe)
-import Parser               (parseFileToAST, defaultParserOpts)
+import Hattier.Parser               (parseFileToAST, defaultParserOpts)
 
 tests :: TestTree
 tests = testGroup "Parser tests"

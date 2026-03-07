@@ -30,9 +30,10 @@ library
   import:          defaults
   hs-source-dirs:  src
   exposed-modules:
-    Format
-    Parser
-    Types
+    Hattier
+    Hattier.Format
+    Hattier.Parser
+    Hattier.Types
 
   build-depends:
     , base

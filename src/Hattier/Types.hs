@@ -1,4 +1,4 @@
-module Types where
+module Hattier.Types where
 
 import Control.Monad.RWS (RWS, execRWS)
 import Data.Text         (Text)

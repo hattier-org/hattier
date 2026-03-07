@@ -1,4 +1,4 @@
-module Parser (parseFileToAST, defaultDiagOpts, defaultParserOpts, ParseFileToAstError(..)) where
+module Hattier.Parser (parseFileToAST, defaultDiagOpts, defaultParserOpts, ParseFileToAstError(..)) where
 
 import GHC.Parser (parseModuleNoHaddock)
 import GHC.Parser.Lexer (unP, initParserState, ParseResult(..), mkParserOpts, getPsErrorMessages, ParserOpts)

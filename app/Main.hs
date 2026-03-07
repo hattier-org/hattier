@@ -1,7 +1,7 @@
 module Main (main) where
 
-import Format
-import Types
+import Hattier
+import Hattier.Types
 
 main :: IO ()
 main = do
@@ -18,6 +18,6 @@ main = do
   --------------
   --- Format ---
   --------------
-  let _ = execHattier fmt config sourceFiles
+  let _ = execHattier hattier config sourceFiles
 
   return ()
