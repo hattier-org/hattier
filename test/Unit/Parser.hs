@@ -3,7 +3,6 @@ module Unit.Parser (tests) where
 import Test.Tasty           (TestTree, testGroup)
 import Test.Tasty.HUnit     (Assertion, testCase, assertFailure, assertEqual)
 import System.FilePath      ((</>))
-import GHC.Types.SrcLoc     (unLoc)
 import GHC.Hs               (hsmodDecls, hsmodName)
 import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Parser               (parseFileToAST, defaultParserOpts)
@@ -28,7 +27,7 @@ testTopLevelDeclsEqualsTwo = do
   case result of
     Left err -> assertFailure $ "Failed to parse: " ++ show err
     Right ast -> do
-      let declCount = length (hsmodDecls (unLoc ast))
+      let declCount = length (hsmodDecls ast)
       assertEqual "Top-level declaration count" 2 declCount
 
 testModuleNameEqualsExample :: Assertion
@@ -37,7 +36,7 @@ testModuleNameEqualsExample = do
   case result of
     Left err -> assertFailure $ "Failed to parse: " ++ show err
     Right ast -> do
-      let moduleNameStr = case hsmodName (unLoc ast) of
+      let moduleNameStr = case hsmodName ast of
             Just modName -> showSDocUnsafe (ppr modName)
             Nothing -> ""
       assertEqual "Module name" "Example" moduleNameStr
