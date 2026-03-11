@@ -29,10 +29,10 @@ newline = do
 
 incrIndent :: Hattier
 incrIndent = do
-  width <- asks indentWidth
+  width <- asks (fromEnum . indentWidth)
   modify' $ \s -> s {currentIndent = currentIndent s + width}
 
 decrIndent :: Hattier
 decrIndent = do
-  width <- asks indentWidth
+  width <- asks (fromEnum . indentWidth)
   modify' $ \s -> s {currentIndent = max 0 (currentIndent s - width)}

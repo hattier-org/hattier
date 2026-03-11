@@ -40,7 +40,9 @@ library
   build-depends:
     , base
     , ghc-lib-parser  ^>=9.10.3
+    , dhall             ^>=1.42.3
     , mtl             ^>=2.3.2
+    , optparse-generic  ^>=1.5.2
     , text            ^>=2.1.4
 
 executable hattier
@@ -50,6 +52,11 @@ executable hattier
   build-depends:
     , base
     , hattier
+    , mtl
+    , transformers
+    , dhall
+    , optparse-generic
+    , directory
 
 test-suite hattier-test
   import:         defaults
