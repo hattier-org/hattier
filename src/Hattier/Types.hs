@@ -15,6 +15,12 @@ data Config = Config
   , maxLineLength :: Int
   }
 
+defaultConfig :: Config
+defaultConfig = Config
+  { indentWidth = 2
+  , maxLineLength = 80
+  }
+
 type FormatterState = HattierModule
 
 execHattier :: Hattier -> Config -> FormatterState -> (FormatterState, Log)
