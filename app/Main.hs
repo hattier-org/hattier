@@ -8,7 +8,7 @@ main = do
   --------------------------
   --- Read configuration ---
   --------------------------
-  let config = Config 2 80
+  let config = defaultConfig
 
   -----------------------------------
   --- Read source files to format ---

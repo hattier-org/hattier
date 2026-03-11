@@ -22,7 +22,7 @@ tests =
 fmtWithBuiltinGHC :: IO ()
 fmtWithBuiltinGHC = expectedOutput @=? actualOutput
   where
-    config = Config 2 80
+    config = defaultConfig
     testInput =
       T.unlines
         [ "module Example where"
