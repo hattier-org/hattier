@@ -4,14 +4,11 @@ module Hattier.Format
   ( fmt
   ) where
 
-import Control.Monad.State (get, put)
+import Hattier.Printer.Core
 import Hattier.Types
 
-fmt :: Hattier
-fmt = sequence_ [fmtNothing]
-
--- | Only for example purposes; please delete once proper formatters are written
-fmtNothing :: Hattier
-fmtNothing = do
-  ast <- get
-  put ast
+fmt :: HattierModule -> Hattier
+fmt ast = do
+  printModHeader ast
+  printModImports ast
+  printModDecls ast

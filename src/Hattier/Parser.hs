@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Hattier.Parser (parseTextToAST, defaultDiagOpts, defaultParserOpts, ParseTextToAstError(..)) where
 
 import GHC.Parser (parseModuleNoHaddock)
@@ -10,11 +12,12 @@ import qualified GHC.Data.StringBuffer as SB
 import qualified GHC.Data.EnumSet as EnumSet
 import qualified GHC.Unit.Module.Warnings as Warnings
 import Data.Text as T hiding (show)
+import Control.Exception (Exception)
 
 import Hattier.Types (HattierModule)
 
 -- | Possible parseTextToAST errors
-data ParseTextToAstError = ParseFailed String deriving (Show, Eq)
+data ParseTextToAstError = ParseFailed String deriving (Show, Eq, Exception)
 
 -- | Default DiagOpts to construct defaultParserOpts with
 defaultDiagOpts :: DiagOpts

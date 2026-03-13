@@ -33,6 +33,8 @@ library
     Hattier
     Hattier.Format
     Hattier.Parser
+    Hattier.Printer.Combinators
+    Hattier.Printer.Core
     Hattier.Types
 
   build-depends:

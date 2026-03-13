@@ -3,7 +3,6 @@ module Unit.Format
   ) where
 
 import Data.Text as T hiding (show)
-import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier
 import Hattier.Parser
 import Hattier.Types
@@ -16,11 +15,11 @@ tests =
     "Format tests"
     [ testCase
         "formatting with the GHC pretty printer works properly"
-        fmtWithBuiltinGHC
+        testFmtWithBuiltinGHC
     ]
 
-fmtWithBuiltinGHC :: IO ()
-fmtWithBuiltinGHC = expectedOutput @=? actualOutput
+testFmtWithBuiltinGHC :: IO ()
+testFmtWithBuiltinGHC = expectedOutput @=? actualOutput
   where
     config = defaultConfig
     testInput =
@@ -32,14 +31,9 @@ fmtWithBuiltinGHC = expectedOutput @=? actualOutput
         , "f False = 2"
         ]
     expectedOutput =
-      "module Example where\nf :: Bool -> Int\nf True = 1\nf False = 2"
-    ast = fst (execHattier hattier config (testState testInput))
-    actualOutput = T.pack . showSDocUnsafe . ppr $ ast
-
-testState :: Text -> FormatterState
-testState input = ast
-  where
+      "module Example where\n\nf :: Bool -> Int\nf True = 1\nf False = 2"
     ast =
-      case parseTextToAST input defaultParserOpts of
+      case parseTextToAST testInput defaultParserOpts of
         Right a -> a
         Left err -> error $ "test fixture failed to parse: " <> show err
+    actualOutput = fst (execHattier (hattier ast) config initialState)
