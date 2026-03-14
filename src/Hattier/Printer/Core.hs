@@ -2,6 +2,7 @@
 
 module Hattier.Printer.Core where
 
+import Control.Monad.RWS
 import qualified Data.Text as T
 import GHC.Hs
 import GHC.Types.SrcLoc
@@ -9,15 +10,16 @@ import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Printer.Combinators
 import Hattier.Types
 
-printModHeader :: HattierModule -> Hattier
-printModHeader HsModule {..} = do
+printModHeader :: Hattier
+printModHeader = do
+  source <- asks ast
   append "module "
   -- parse the module name
-  case hsmodName of
+  case hsmodName source of
     Nothing -> pure ()
     Just (L _ n) -> printModName n
   -- parse module exports
-  case hsmodExports of
+  case hsmodExports source of
     Nothing -> pure ()
     Just exps -> printModExports exps
   append " where"
@@ -31,20 +33,23 @@ printModName name = append (T.pack $ moduleNameString name)
 printModExports :: XRec GhcPs [LIE GhcPs] -> Hattier
 printModExports _ = pure ()
 
-printModImports :: HattierModule -> Hattier
-printModImports HsModule {..} = mapM_ printImport hsmodImports
+printModImports :: Hattier
+printModImports = do
+  source <- asks ast
+  mapM_ printImport (hsmodImports source)
 
 -- TODO: append an import statement (including qualified, as, etc.)
 printImport :: LImportDecl GhcPs -> Hattier
 printImport (L _ ImportDecl {}) = pure ()
 
-printModDecls :: HattierModule -> Hattier
-printModDecls HsModule {..}
+printModDecls :: Hattier
+printModDecls
   -- splitting up these cases enables us to only put
   -- newlines in between declarations and not after the
   -- final one.
- =
-  case hsmodDecls of
+ = do
+  source <- asks ast
+  case hsmodDecls source of
     [] -> pure ()
     d:ds -> do
       printDecl d

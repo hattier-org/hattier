@@ -14,14 +14,13 @@ tests =
   testGroup
     "Format tests"
     [ testCase
-        "formatting with the GHC pretty printer works properly"
-        testFmtWithBuiltinGHC
+        "formatting an extremely simple module works properly"
+        fmtSimpleModule
     ]
 
-testFmtWithBuiltinGHC :: IO ()
-testFmtWithBuiltinGHC = expectedOutput @=? actualOutput
+fmtSimpleModule :: IO ()
+fmtSimpleModule = expectedOutput @=? actualOutput
   where
-    config = defaultConfig
     testInput =
       T.unlines
         [ "module Example where"
@@ -32,8 +31,9 @@ testFmtWithBuiltinGHC = expectedOutput @=? actualOutput
         ]
     expectedOutput =
       "module Example where\n\nf :: Bool -> Int\nf True = 1\nf False = 2"
-    ast =
+    source =
       case parseTextToAST testInput defaultParserOpts of
-        Right a -> a
+        Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    actualOutput = fst (execHattier (hattier ast) config initialState)
+    env = Env source defaultConfig
+    actualOutput = fst (execHattier hattier env initialState)
