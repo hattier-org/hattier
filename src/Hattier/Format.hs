@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Hattier.Format
   ( fmt
   ) where
@@ -7,8 +5,8 @@ module Hattier.Format
 import Hattier.Printer.Core
 import Hattier.Types
 
-fmt :: HattierModule -> Hattier
-fmt ast = do
-  printModHeader ast
-  printModImports ast
-  printModDecls ast
+fmt :: Hattier
+fmt = do
+  printModHeader
+  printModImports
+  printModDecls
