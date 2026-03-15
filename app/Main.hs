@@ -17,12 +17,13 @@ main = do
   --- Read source files to format ---
   -----------------------------------
   let sourceFile = undefined
-  let ast =
+      source =
         case parseTextToAST sourceFile defaultParserOpts of
           Left e -> throw e
           Right ast' -> ast'
+      env = Env source config
   --------------
   --- Format ---
   --------------
-  let _ = execHattier (hattier ast) config initialState
+  let _ = execHattier hattier env initialState
   return ()
