@@ -6,7 +6,6 @@ import Control.Monad.RWS
 import qualified Data.Text as T
 import GHC.Hs
 import GHC.Types.SrcLoc
-import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Format.Let (printLetExpr)
 import Hattier.Printer.Combinators
 import Hattier.Types
@@ -67,4 +66,4 @@ printDecl (L _ (ValD _ (FunBind _ _lname mg)))
       unLoc (mg_alts mg) =
       printLetExpr binds body
 -- Default case: just print the declaration as-is
-printDecl decl = append $ T.pack . showSDocUnsafe . ppr $ decl
+printDecl decl = append $ pprText decl

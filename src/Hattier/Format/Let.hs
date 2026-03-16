@@ -5,7 +5,6 @@ import qualified Data.Text as T
 import GHC.Data.Bag (bagToList)
 import GHC.Hs
 import GHC.Types.SrcLoc
-import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Printer.Combinators
 import Hattier.Types
 
@@ -32,7 +31,7 @@ printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
 
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
-  append $ T.pack . showSDocUnsafe . ppr $ localBinds
+  append $ pprText localBinds
   newline >> append "in " >> printLetBody (unLoc body)
 
 -- | @OneLine@: all bindings on one line separated by @; @.
@@ -63,7 +62,7 @@ printBinds ind alignCol (b:bs) = do
 -- When @alignCol = 0@ no padding is added.
 printBind :: Int -> LHsBind GhcPs -> Hattier
 printBind alignCol (L _ (FunBind _ lname mg)) = do
-  let name    = T.pack . showSDocUnsafe . ppr $ unLoc lname
+  let name    = pprText $ unLoc lname
   let padding = T.replicate (max 0 (alignCol - T.length name)) " "
   append name >> append padding >> append " = "
   case unLoc (mg_alts mg) of
@@ -75,7 +74,7 @@ printBind alignCol (L _ (FunBind _ lname mg)) = do
       append "..."
 printBind _ bind =
   -- TODO: PatBind and other binding forms
-  append $ T.pack . showSDocUnsafe . ppr $ unLoc bind
+  append $ pprText $ unLoc bind
 
 -- | Compute the column at which @=@ should appear for 'PrimaryAlignment':
 -- the length of the longest binding name.  Returns 0 for an empty list.
@@ -85,7 +84,7 @@ bindAlignCol bs = maximum (map nameLen bs)
   where
     nameLen :: LHsBind GhcPs -> Int
     nameLen (L _ (FunBind _ lname _)) =
-      T.length . T.pack . showSDocUnsafe . ppr $ unLoc lname
+      T.length $ pprText $ unLoc lname
     nameLen _ = 0
 
 -- | Print the body of a @let@ expression, recursing into nested @let@s.
@@ -93,5 +92,5 @@ printLetBody :: HsExpr GhcPs -> Hattier
 printLetBody (HsLet _ nestedBinds nestedBody) =
   printLetExpr nestedBinds nestedBody
 printLetBody expr =
-  -- TODO: here we kind of need to recurse into normal printing...
-  append $ T.pack . showSDocUnsafe . ppr $ expr
+  -- TODO: here we kind of need to recurse into normal printing... 
+  append $ pprText expr
