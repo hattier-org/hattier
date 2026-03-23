@@ -31,6 +31,7 @@ library
   hs-source-dirs:  src
   exposed-modules:
     Hattier
+    Hattier.Config
     Hattier.Format
     Hattier.Parser
     Hattier.Printer.Combinators
@@ -39,9 +40,12 @@ library
 
   build-depends:
     , base
-    , ghc-lib-parser  ^>=9.10.3
-    , mtl             ^>=2.3.2
-    , text            ^>=2.1.4
+    , data-default
+    , dhall
+    , ghc-lib-parser
+    , mtl
+    , optparse-generic
+    , text
 
 executable hattier
   import:         defaults
@@ -49,7 +53,13 @@ executable hattier
   main-is:        Main.hs
   build-depends:
     , base
+    , data-default
+    , dhall
+    , directory
     , hattier
+    , optparse-generic
+    , safe-exceptions
+    , text
 
 test-suite hattier-test
   import:         defaults
@@ -62,11 +72,12 @@ test-suite hattier-test
 
   build-depends:
     , base
-    , filepath          ^>=1.5.4.0
-    , ghc-lib-parser    ^>=9.10.3
+    , data-default
+    , filepath
+    , ghc-lib-parser
     , hattier
-    , QuickCheck        ^>=2.17.1.0
-    , tasty             ^>=1.5.3
-    , tasty-hunit       ^>=0.10.2
-    , tasty-quickcheck  ^>=0.11.1
-    , text              ^>=2.1.4
+    , QuickCheck
+    , tasty
+    , tasty-hunit
+    , tasty-quickcheck
+    , text

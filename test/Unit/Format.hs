@@ -4,10 +4,9 @@ module Unit.Format
 
 import Data.Text as T hiding (show)
 import Hattier
-import Hattier.Parser
-import Hattier.Types
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit ((@=?), testCase)
+import Data.Default (def)
 
 tests :: TestTree
 tests =
@@ -35,5 +34,5 @@ fmtSimpleModule = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source defaultConfig
+    env = Env source def
     actualOutput = fst (execHattier hattier env initialState)
