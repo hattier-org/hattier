@@ -19,21 +19,25 @@ printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
   case style of
     OneLine          -> printOneLineBinds bindList >> append " in " >> printLetBody (unLoc body)
     NoAlignment      -> do
-      let ind = T.replicate indW " "
+      let bindInd = T.replicate (indW + 4) " "
+      let inInd   = T.replicate indW " "
       append "let "
-      printBinds ind 0 bindList
-      newline >> append "in " >> printLetBody (unLoc body)
+      printBinds bindInd 0 bindList
+      newline >> append inInd >> append "in " >> printLetBody (unLoc body)
     PrimaryAlignment -> do
-      let ind      = T.replicate indW " "
+      let bindInd  = T.replicate (indW + 4) " "
+      let inInd    = T.replicate indW " "
       let alignCol = bindAlignCol bindList
       append "let "
-      printBinds ind alignCol bindList
-      newline >> append "in " >> printLetBody (unLoc body)
+      printBinds bindInd alignCol bindList
+      newline >> append inInd >> append "in " >> printLetBody (unLoc body)
 
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
+  indW <- asks (fromIntegral . indentWidth . cfg)
+  let ind = T.replicate indW " "
   append $ pprText localBinds
-  newline >> append "in " >> printLetBody (unLoc body)
+  newline >> append ind >> append "in " >> printLetBody (unLoc body)
 
 -- | @OneLine@: all bindings on one line separated by @; @.
 --

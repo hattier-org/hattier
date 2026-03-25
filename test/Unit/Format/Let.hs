@@ -66,14 +66,14 @@ letSrc =
 noAlignmentTest :: IO ()
 noAlignmentTest = expected @=? runLetPrinter NoAlignment letSrc
   where
-    expected = "let x = 1\n  longName = 2\nin x"
+    expected = "let x = 1\n      longName = 2\n  in x"
 
 primaryAlignmentTest :: IO ()
 primaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment letSrc
   where
     --   x        = 1   (x padded to length 8 = length of "longName")
     --   longName = 2
-    expected = "let x        = 1\n  longName = 2\nin x"
+    expected = "let x        = 1\n      longName = 2\n  in x"
 
 oneLineTest :: IO ()
 oneLineTest = expected @=? runLetPrinter OneLine letSrc
@@ -94,13 +94,13 @@ nestedLetSrc =
 nestedNoAlignmentTest :: IO ()
 nestedNoAlignmentTest = expected @=? runLetPrinter NoAlignment nestedLetSrc
   where
-    expected = "let x = 1\n  longName = 2\nin let result = x\nin result"
+    expected = "let x = 1\n      longName = 2\n  in let result = x\n  in result"
 
 nestedPrimaryAlignmentTest :: IO ()
 nestedPrimaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment nestedLetSrc
   where
     -- outer block: "longName" (8) drives alignment; inner block: "result" (6) drives its own
-    expected = "let x        = 1\n  longName = 2\nin let result = x\nin result"
+    expected = "let x        = 1\n      longName = 2\n  in let result = x\n  in result"
 
 nestedOneLineTest :: IO ()
 nestedOneLineTest = expected @=? runLetPrinter OneLine nestedLetSrc
