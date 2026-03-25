@@ -1,7 +1,15 @@
-module Hattier where
+module Hattier
+  ( module Hattier.Config
+  , module Hattier.Format
+  , module Hattier.Parser
+  , module Hattier.Types
+  , hattier
+  ) where
 
-import Hattier.Format (fmt)
-import Hattier.Types (Hattier)
+import Hattier.Config
+import Hattier.Format
+import Hattier.Parser
+import Hattier.Types
 
 hattier :: Hattier
 hattier = fmt

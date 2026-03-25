@@ -4,6 +4,8 @@ import Control.Monad.RWS (RWS, execRWS)
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Builder (Builder, toLazyText)
 import GHC.Hs (GhcPs, HsModule)
+import Options.Generic hiding (Text)
+import Hattier.Config
 
 type Hattier = RWS Env Log FormatterState ()
 
@@ -24,15 +26,12 @@ data Config = Config
 
 data Env = Env
   { ast :: HattierModule
-  , cfg :: Config
+  , cfg :: Config Unwrapped
   }
 
 data FormatterState = FormatterState
   { builder :: Builder -- The rendered source code so far
   }
-
-defaultConfig :: Config
-defaultConfig = Config {indentWidth = 2, maxLineLength = 80, letAlignment = NoAlignment}
 
 initialState :: FormatterState
 initialState = FormatterState {builder = mempty}
