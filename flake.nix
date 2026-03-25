@@ -26,6 +26,7 @@
             haskellPackages.hindent
             haskell-language-server
             hlint
+            zlib
           ];
         };
       }
