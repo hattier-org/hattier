@@ -9,7 +9,7 @@ import GHC.Types.SrcLoc
 import Data.Default (def)
 import Hattier.Config
 import Options.Generic (Unwrapped)
-import Hattier.Format.Let
+import Hattier.Printer.Declaration.Value.Let
 import Hattier.Parser
 import Hattier.Types
 import Test.Tasty (TestTree, testGroup)
@@ -21,15 +21,13 @@ tests =
     "Let formatting tests"
     [ testCase "NoAlignment: bindings uniformly indented"        noAlignmentTest
     , testCase "PrimaryAlignment: '=' signs aligned"             primaryAlignmentTest
-    , testCase "OneLine: all bindings on one line"               oneLineTest
     , testCase "NoAlignment: nested let in body"                 nestedNoAlignmentTest
     , testCase "PrimaryAlignment: nested let, each block aligns" nestedPrimaryAlignmentTest
-    , testCase "OneLine: nested let on one line"                 nestedOneLineTest
     ]
 
 
 -- | Run only the let printer against the first let expression found in @src@.
-runLetPrinter :: LetAlignment -> T.Text -> T.Lazy.Text
+runLetPrinter :: Alignment -> T.Text -> T.Lazy.Text
 runLetPrinter style src =
   let m = case parseTextToAST src defaultParserOpts of
             Right ast' -> ast'
@@ -75,11 +73,6 @@ primaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment letSrc
     --   longName = 2
     expected = "let x        = 1\n      longName = 2\n  in x"
 
-oneLineTest :: IO ()
-oneLineTest = expected @=? runLetPrinter OneLine letSrc
-  where
-    expected = "let x = 1; longName = 2 in x"
-
 -- | Source with a let nested inside the body of an outer let.
 nestedLetSrc :: T.Text
 nestedLetSrc =
@@ -101,8 +94,3 @@ nestedPrimaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment nestedL
   where
     -- outer block: "longName" (8) drives alignment; inner block: "result" (6) drives its own
     expected = "let x        = 1\n      longName = 2\n  in let result = x\n  in result"
-
-nestedOneLineTest :: IO ()
-nestedOneLineTest = expected @=? runLetPrinter OneLine nestedLetSrc
-  where
-    expected = "let x = 1; longName = 2 in let result = x in result"

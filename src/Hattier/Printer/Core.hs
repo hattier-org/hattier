@@ -1,31 +1,29 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Hattier.Printer.Core where
 
 import Control.Monad.RWS
 import qualified Data.Text as T
 import GHC.Hs
 import GHC.Types.SrcLoc
-import Hattier.Format.Let (printLetExpr)
 import Hattier.Printer.Combinators
+import Hattier.Printer.Declaration
 import Hattier.Types
-import Hattier.Config
 
 printModHeader :: Hattier
 printModHeader = do
   source <- asks ast
-  append "module "
-  -- parse the module name
+  -- only print a header if there is one
   case hsmodName source of
     Nothing -> pure ()
-    Just (L _ n) -> printModName n
-  -- parse module exports
-  case hsmodExports source of
-    Nothing -> pure ()
-    Just exps -> printModExports exps
-  append " where"
-  newline
-  newline
+    Just (L _ n) -> do
+      append "module "
+      printModName n
+      -- parse module exports
+      case hsmodExports source of
+        Nothing -> pure ()
+        Just exps -> printModExports exps
+      append " where"
+      newline
+      newline
 
 printModName :: ModuleName -> Hattier
 printModName name = append (T.pack $ moduleNameString name)
@@ -55,20 +53,3 @@ printModDecls
     d:ds -> do
       printDecl d
       mapM_ (\decl -> newline >> printDecl decl) ds
-
--- TODO: pretty print a declaration. you can focus on one
--- type of declaration by pattern matching, leaving the 
--- current implementation as default case at the bottom
-printDecl :: LHsDecl GhcPs -> Hattier
--- Let expressions:
-printDecl (L _ (ValD _ (FunBind _ lname mg)))
-  -- A top-level binding whose sole RHS is a let expression
-  | [L _ (Match _ _ _pats (GRHSs _ [L _ (GRHS _ [] (L _ (HsLet _ binds body)))] _))] <-
-      unLoc (mg_alts mg) = do
-      indW <- asks (fromIntegral . indentWidth . cfg)
-      let ind = T.replicate indW " "
-      append (pprText (unLoc lname)) >> append " ="
-      newline >> append ind
-      printLetExpr binds body
--- Default case: just print the declaration as-is
-printDecl decl = append $ pprText decl
