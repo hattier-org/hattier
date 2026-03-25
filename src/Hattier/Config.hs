@@ -20,11 +20,23 @@ data CLI =  CLI (Config Wrapped) PosArg deriving (Generic)
 newtype PosArg = PosArg (Maybe FilePath <?> "file name") deriving (Generic)
 
 data Config w = Config
-  { indentWidth   :: w ::: Natural <#> "w" <!> "2"     <?> "The desired indentation width"
-  , inPlace       :: w ::: Bool    <#> "i" <!> "false" <?> "edit files in place"
-  , version       :: w ::: Bool    <#> "v" <!> "false" <?> "hattier version"
-  , defaultConfig :: w ::: Bool    <#> "d" <!> "false" <?> "Print out the default configuration file"
+  { indentWidth   :: w ::: Natural     <#> "w"   <!> "2"               <?> "The desired indentation width"
+  , letAlignment  :: w ::: LetAlignment<#> "let" <!> "PrimaryAlignment" <?> "The alignment style for let-bindings: one-line, no-alignment, or primary-alignment"
+  , inPlace       :: w ::: Bool        <#> "i"   <!> "false"           <?> "edit files in place"
+  , version       :: w ::: Bool        <#> "v"   <!> "false"           <?> "hattier version"
+  , defaultConfig :: w ::: Bool        <#> "d"   <!> "false"           <?> "Print out the default configuration file"
   } deriving (Generic)
+
+
+data LetAlignment
+  = NoAlignment      -- ^ Indent each binding uniformly, no padding
+  | PrimaryAlignment -- ^ Pad names so '=' signs align to the longest name
+  | OneLine          -- ^ Collapse all bindings onto one line: let x = 1; y = 2 in body
+  deriving (Eq, Generic, Read, Show, FromDhall, ToDhall)
+
+instance ParseField  LetAlignment
+instance ParseFields LetAlignment
+instance ParseRecord LetAlignment
 
 instance ParseRecord CLI where
   parseRecord = CLI <$> parseRecord <*> parseRecord

@@ -7,13 +7,14 @@ import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Types
+import Hattier.Config
 
 -- | Pretty-print a @let ... in ...@ expression.
 -- The style is driven by 'letAlignment' in 'Config'.
 printLetExpr :: HsLocalBinds GhcPs -> LHsExpr GhcPs -> Hattier
 printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
   style    <- asks (letAlignment . cfg)
-  indW     <- asks (indentWidth . cfg)
+  indW     <- asks (fromIntegral . indentWidth . cfg)
   let bindList = bagToList binds
   case style of
     OneLine          -> printOneLineBinds bindList >> append " in " >> printLetBody (unLoc body)

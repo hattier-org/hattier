@@ -60,10 +60,12 @@ printModDecls
 -- current implementation as default case at the bottom
 printDecl :: LHsDecl GhcPs -> Hattier
 -- Let expressions:
-printDecl (L _ (ValD _ (FunBind _ _lname mg)))
+printDecl (L _ (ValD _ (FunBind _ lname mg)))
   -- A top-level binding whose sole RHS is a let expression
   | [L _ (Match _ _ _pats (GRHSs _ [L _ (GRHS _ [] (L _ (HsLet _ binds body)))] _))] <-
-      unLoc (mg_alts mg) =
+      unLoc (mg_alts mg) = do
+      append (pprText (unLoc lname)) >> append " ="
+      newline
       printLetExpr binds body
 -- Default case: just print the declaration as-is
 printDecl decl = append $ pprText decl

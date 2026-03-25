@@ -13,17 +13,6 @@ type Log = [Text]
 
 type HattierModule = HsModule GhcPs
 
-data LetAlignment
-  = NoAlignment      -- ^ Indent each binding uniformly, no padding
-  | PrimaryAlignment -- ^ Pad names so '=' signs align to the longest name
-  | OneLine          -- ^ Collapse all bindings onto one line: let x = 1; y = 2 in body
-
-data Config = Config
-  { indentWidth  :: Int
-  , maxLineLength :: Int
-  , letAlignment :: LetAlignment
-  }
-
 data Env = Env
   { ast :: HattierModule
   , cfg :: Config Unwrapped

@@ -79,6 +79,7 @@ test-suite hattier-test
     , ghc-lib-parser ^>= 9.10.3
     , hattier
     , QuickCheck
+    , optparse-generic
     , tasty
     , tasty-hunit
     , tasty-quickcheck

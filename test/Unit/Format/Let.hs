@@ -6,6 +6,9 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as T.Lazy
 import GHC.Hs
 import GHC.Types.SrcLoc
+import Data.Default (def)
+import Hattier.Config
+import Options.Generic (Unwrapped)
 import Hattier.Format.Let
 import Hattier.Parser
 import Hattier.Types
@@ -32,7 +35,7 @@ runLetPrinter style src =
             Right ast' -> ast'
             Left err   -> error $ "parse error: " <> show err
       (binds, body) = extractLet m
-      config        = defaultConfig {letAlignment = style}
+      config        = (def :: Config Unwrapped) {letAlignment = style}
       env           = Env m config
   in fst (execHattier (printLetExpr binds body) env initialState)
 
