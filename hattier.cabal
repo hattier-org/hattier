@@ -33,6 +33,7 @@ library
     Hattier
     Hattier.Config
     Hattier.Format
+    Hattier.Format.Let
     Hattier.Parser
     Hattier.Printer.Combinators
     Hattier.Printer.Core
@@ -68,6 +69,7 @@ test-suite hattier-test
   main-is:        Main.hs
   other-modules:
     Unit.Format
+    Unit.Format.Let
     Unit.Parser
 
   build-depends:
@@ -77,6 +79,7 @@ test-suite hattier-test
     , ghc-lib-parser ^>= 9.10.3
     , hattier
     , QuickCheck
+    , optparse-generic
     , tasty
     , tasty-hunit
     , tasty-quickcheck

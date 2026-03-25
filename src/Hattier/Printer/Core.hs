@@ -6,9 +6,10 @@ import Control.Monad.RWS
 import qualified Data.Text as T
 import GHC.Hs
 import GHC.Types.SrcLoc
-import GHC.Utils.Outputable (ppr, showSDocUnsafe)
+import Hattier.Format.Let (printLetExpr)
 import Hattier.Printer.Combinators
 import Hattier.Types
+import Hattier.Config
 
 printModHeader :: Hattier
 printModHeader = do
@@ -59,4 +60,15 @@ printModDecls
 -- type of declaration by pattern matching, leaving the 
 -- current implementation as default case at the bottom
 printDecl :: LHsDecl GhcPs -> Hattier
-printDecl decl = append $ T.pack . showSDocUnsafe . ppr $ decl
+-- Let expressions:
+printDecl (L _ (ValD _ (FunBind _ lname mg)))
+  -- A top-level binding whose sole RHS is a let expression
+  | [L _ (Match _ _ _pats (GRHSs _ [L _ (GRHS _ [] (L _ (HsLet _ binds body)))] _))] <-
+      unLoc (mg_alts mg) = do
+      indW <- asks (fromIntegral . indentWidth . cfg)
+      let ind = T.replicate indW " "
+      append (pprText (unLoc lname)) >> append " ="
+      newline >> append ind
+      printLetExpr binds body
+-- Default case: just print the declaration as-is
+printDecl decl = append $ pprText decl

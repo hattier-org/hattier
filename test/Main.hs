@@ -2,6 +2,7 @@ module Main where
 
 import Test.Tasty                      (TestTree, defaultMain, testGroup)
 import Unit.Format qualified as Format (tests)
+import Unit.Format.Let qualified as FormatLet (tests)
 import Unit.Parser qualified as Parser (tests)
 
 main :: IO ()
@@ -17,6 +18,7 @@ tests = testGroup "Hattier tests"
 units :: TestTree
 units = testGroup "Unit tests"
   [ Format.tests
+  , FormatLet.tests
   , Parser.tests
   ]
 
