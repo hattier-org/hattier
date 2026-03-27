@@ -9,9 +9,8 @@ import Data.Text.Lazy qualified as T.Lazy
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
-import Options.Generic (Unwrapped)
-import Hattier.Printer.Declaration.Value.Let
 import Hattier.Parser
+import Hattier.Printer.Declaration.Value.Let
 import Hattier.Types
 import Options.Generic (Unwrapped)
 import Test.Tasty (TestTree, testGroup)
@@ -21,10 +20,10 @@ tests :: TestTree
 tests =
   testGroup
     "Let formatting tests"
-    [ testCase "NoAlignment: bindings uniformly indented"        noAlignmentTest
-    , testCase "PrimaryAlignment: '=' signs aligned"             primaryAlignmentTest
-    , testCase "NoAlignment: nested let in body"                 nestedNoAlignmentTest
-    , testCase "PrimaryAlignment: nested let, each block aligns" nestedPrimaryAlignmentTest
+    [ testCase "NoAlignment: bindings uniformly indented" noAlignmentTest,
+      testCase "PrimaryAlignment: '=' signs aligned" primaryAlignmentTest,
+      testCase "NoAlignment: nested let in body" nestedNoAlignmentTest,
+      testCase "PrimaryAlignment: nested let, each block aligns" nestedPrimaryAlignmentTest
     ]
 
 -- | Run only the let printer against the first let expression found in @src@.

@@ -23,13 +23,6 @@ units =
     [ Format.tests,
       Parser.tests
     ]
-units =
-  testGroup
-    "Unit tests"
-    [ Format.tests,
-      FormatLet.tests,
-      Parser.tests
-    ]
 
 -- propertys :: TestTree
 -- propertys = undefined
