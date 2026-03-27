@@ -1,35 +1,33 @@
 module Main
-  ( main
-  ) where
+  ( main,
+  )
+where
 
-import Control.Applicative ( (<|>) )
+import Control.Applicative ((<|>))
 import Control.Exception.Safe
 import Control.Monad (when)
 import Data.Default (def)
 import Data.Maybe (fromMaybe)
+import Data.Text.IO qualified as T (readFile)
+import Data.Text.Lazy qualified as TL (concat)
+import Data.Text.Lazy.IO qualified as TL (appendFile, putStrLn, writeFile)
 import Data.Version (showVersion)
-
-import Dhall (inputFile, auto)
-import Options.Generic (Unwrapped, getWithHelp, unwrap, unHelpful)
-import System.Directory (XdgDirectory(..), getXdgDirectory, getCurrentDirectory)
-import System.Exit (exitSuccess)
-
-import qualified Data.Text.IO as T (readFile)
-import qualified Data.Text.Lazy as TL (concat)
-import qualified Data.Text.Lazy.IO as TL (writeFile, appendFile, putStrLn)
-
-import Prelude hiding (log)
-import qualified Paths_hattier as Paths (version)
+import Dhall (auto, inputFile)
 import Hattier
+import Options.Generic (Unwrapped, getWithHelp, unHelpful, unwrap)
+import Paths_hattier qualified as Paths (version)
+import System.Directory (XdgDirectory (..), getCurrentDirectory, getXdgDirectory)
+import System.Exit (exitSuccess)
+import Prelude hiding (log)
 
 main :: IO ()
 main = do
   --------------------------
   --- Read configuration ---
   --------------------------
-  sysDhall                 <- pure Nothing -- TODO: implement
-  usrDhall                 <- loadDhallIfExists =<< getXdgDirectory XdgConfig ""
-  prjDhall                 <- loadDhallIfExists =<< getCurrentDirectory
+  sysDhall <- pure Nothing -- TODO: implement
+  usrDhall <- loadDhallIfExists =<< getXdgDirectory XdgConfig ""
+  prjDhall <- loadDhallIfExists =<< getCurrentDirectory
   (CLI flags posArg, help) <- getWithHelp "<hattier3"
   let dhall = fromMaybe def (prjDhall <|> usrDhall <|> sysDhall)
   let config = mergeFlags def dhall (unwrap flags)
@@ -63,10 +61,9 @@ main = do
     then TL.writeFile file out
     else TL.putStrLn out
 
-{-|
-  We do not need to notify the user if a dhall config file is not present,
-  since we can always recover by applying default configuration options always.
--}
+-- |
+--  We do not need to notify the user if a dhall config file is not present,
+--  since we can always recover by applying default configuration options always.
 loadDhallIfExists :: FilePath -> IO (Maybe (Config Unwrapped))
 loadDhallIfExists fp =
   catchIO

@@ -1,12 +1,13 @@
 module Unit.Format
-  ( tests
-  ) where
+  ( tests,
+  )
+where
 
+import Data.Default (def)
 import Data.Text as T hiding (show)
 import Hattier
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit ((@=?), testCase)
-import Data.Default (def)
+import Test.Tasty.HUnit (testCase, (@=?))
 
 tests :: TestTree
 tests =
@@ -22,11 +23,11 @@ fmtSimpleModule = expectedOutput @=? actualOutput
   where
     testInput =
       T.unlines
-        [ "module Example where"
-        , ""
-        , "f :: Bool -> Int"
-        , "f True = 1"
-        , "f False = 2"
+        [ "module Example where",
+          "",
+          "f :: Bool -> Int",
+          "f True = 1",
+          "f False = 2"
         ]
     expectedOutput =
       "module Example where\n\nf :: Bool -> Int\nf True = 1\nf False = 2"

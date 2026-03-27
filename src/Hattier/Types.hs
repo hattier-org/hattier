@@ -4,8 +4,8 @@ import Control.Monad.RWS (RWS, execRWS)
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Builder (Builder, toLazyText)
 import GHC.Hs (GhcPs, HsModule)
-import Options.Generic hiding (Text)
 import Hattier.Config
+import Options.Generic hiding (Text)
 
 type Hattier = RWS Env Log FormatterState ()
 
@@ -14,8 +14,8 @@ type Log = [Text]
 type HattierModule = HsModule GhcPs
 
 data Env = Env
-  { ast :: HattierModule
-  , cfg :: Config Unwrapped
+  { ast :: HattierModule,
+    cfg :: Config Unwrapped
   }
 
 data FormatterState = FormatterState
