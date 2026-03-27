@@ -1,9 +1,10 @@
 module Unit.Parser
-  ( tests
-  ) where
+  ( tests,
+  )
+where
 
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Hs (hsmodDecls, hsmodName)
 import GHC.Utils.Outputable (ppr, showSDocUnsafe)
 import Hattier.Parser (defaultParserOpts, parseTextToAST)
@@ -14,9 +15,9 @@ tests :: TestTree
 tests =
   testGroup
     "Parser tests"
-    [ testCase "parse example file successfully" testParseExample
-    , testCase "top-level declarations equals 2" testTopLevelDeclsEqualsTwo
-    , testCase "module name equals Example" testModuleNameEqualsExample
+    [ testCase "parse example file successfully" testParseExample,
+      testCase "top-level declarations equals 2" testTopLevelDeclsEqualsTwo,
+      testCase "module name equals Example" testModuleNameEqualsExample
     ]
 
 testParseExample :: Assertion

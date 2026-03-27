@@ -1,37 +1,36 @@
 module Hattier.Format.Let where
 
 import Control.Monad.RWS
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Data.Bag (bagToList)
 import GHC.Hs
 import GHC.Types.SrcLoc
+import Hattier.Config
 import Hattier.Printer.Combinators
 import Hattier.Types
-import Hattier.Config
 
 -- | Pretty-print a @let ... in ...@ expression.
 -- The style is driven by 'letAlignment' in 'Config'.
 printLetExpr :: HsLocalBinds GhcPs -> LHsExpr GhcPs -> Hattier
 printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
-  style    <- asks (letAlignment . cfg)
-  indW     <- asks (fromIntegral . indentWidth . cfg)
+  style <- asks (letAlignment . cfg)
+  indW <- asks (fromIntegral . indentWidth . cfg)
   let bindList = bagToList binds
   case style of
-    OneLine          -> printOneLineBinds bindList >> append " in " >> printLetBody (unLoc body)
-    NoAlignment      -> do
+    OneLine -> printOneLineBinds bindList >> append " in " >> printLetBody (unLoc body)
+    NoAlignment -> do
       let bindInd = T.replicate (indW + 4) " "
-      let inInd   = T.replicate indW " "
+      let inInd = T.replicate indW " "
       append "let "
       printBinds bindInd 0 bindList
       newline >> append inInd >> append "in " >> printLetBody (unLoc body)
     PrimaryAlignment -> do
-      let bindInd  = T.replicate (indW + 4) " "
-      let inInd    = T.replicate indW " "
+      let bindInd = T.replicate (indW + 4) " "
+      let inInd = T.replicate indW " "
       let alignCol = bindAlignCol bindList
       append "let "
       printBinds bindInd alignCol bindList
       newline >> append inInd >> append "in " >> printLetBody (unLoc body)
-
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
   indW <- asks (fromIntegral . indentWidth . cfg)
@@ -43,8 +42,8 @@ printLetExpr localBinds body = do
 --
 --   let x = 1; longName = 2 in body
 printOneLineBinds :: [LHsBind GhcPs] -> Hattier
-printOneLineBinds []     = pure ()
-printOneLineBinds (b:bs) = do
+printOneLineBinds [] = pure ()
+printOneLineBinds (b : bs) = do
   append "let "
   printBind 0 b
   mapM_ (\bind -> append "; " >> printBind 0 bind) bs
@@ -58,8 +57,8 @@ printOneLineBinds (b:bs) = do
 --   let x = 1          -- NoAlignment (alignCol = 0)
 --       longName = 2
 printBinds :: T.Text -> Int -> [LHsBind GhcPs] -> Hattier
-printBinds _   _        []     = pure ()
-printBinds ind alignCol (b:bs) = do
+printBinds _ _ [] = pure ()
+printBinds ind alignCol (b : bs) = do
   printBind alignCol b
   mapM_ (\bind -> newline >> append ind >> printBind alignCol bind) bs
 
@@ -67,7 +66,7 @@ printBinds ind alignCol (b:bs) = do
 -- When @alignCol = 0@ no padding is added.
 printBind :: Int -> LHsBind GhcPs -> Hattier
 printBind alignCol (L _ (FunBind _ lname mg)) = do
-  let name    = pprText $ unLoc lname
+  let name = pprText $ unLoc lname
   let padding = T.replicate (max 0 (alignCol - T.length name)) " "
   append name >> append padding >> append " = "
   case unLoc (mg_alts mg) of
@@ -97,5 +96,5 @@ printLetBody :: HsExpr GhcPs -> Hattier
 printLetBody (HsLet _ nestedBinds nestedBody) =
   printLetExpr nestedBinds nestedBody
 printLetBody expr =
-  -- TODO: here we kind of need to recurse into normal printing... 
+  -- TODO: here we kind of need to recurse into normal printing...
   append $ pprText expr
