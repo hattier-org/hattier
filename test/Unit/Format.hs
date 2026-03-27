@@ -1,6 +1,7 @@
 module Unit.Format
-  ( tests
-  ) where
+  ( tests,
+  )
+where
 
 import Test.Tasty (TestTree, testGroup)
 import Unit.Format.Function qualified as FormatFunc (tests)

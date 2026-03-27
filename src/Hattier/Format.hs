@@ -1,6 +1,7 @@
 module Hattier.Format
-  ( fmt
-  ) where
+  ( fmt,
+  )
+where
 
 import Hattier.Printer.Core
 import Hattier.Types

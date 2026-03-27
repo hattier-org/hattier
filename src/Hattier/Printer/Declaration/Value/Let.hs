@@ -1,9 +1,10 @@
 module Hattier.Printer.Declaration.Value.Let
-  ( printLetExpr
-  ) where
+  ( printLetExpr,
+  )
+where
 
 import Control.Monad.RWS
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Data.Bag (bagToList)
 import GHC.Hs
 import GHC.Types.SrcLoc
@@ -49,7 +50,7 @@ printLetExpr localBinds body = do
 --       longName = 2
 printBinds :: T.Text -> Int -> [LHsBind GhcPs] -> Hattier
 printBinds _ _ [] = pure ()
-printBinds ind alignCol (b:bs) = do
+printBinds ind alignCol (b : bs) = do
   printBind alignCol b
   mapM_ (\bind -> newline >> append ind >> printBind alignCol bind) bs
 
@@ -63,13 +64,13 @@ printBind alignCol (L _ (FunBind _ lname mg)) = do
   case unLoc (mg_alts mg) of
     [L _ (Match _ _ [] (GRHSs _ [L _ (GRHS _ [] body)] _))] ->
       printLetBody (unLoc body)
-      -- Simple case: no patterns, no guards
-    _
+    -- Simple case: no patterns, no guards
+    _ ->
       -- TODO: patterns and guards
-     -> append "..."
-printBind _ bind
+      append "..."
+printBind _ bind =
   -- TODO: PatBind and other binding forms
- = append $ pprText $ unLoc bind
+  append $ pprText $ unLoc bind
 
 -- | Compute the column at which @=@ should appear for 'PrimaryAlignment':
 -- the length of the longest binding name.  Returns 0 for an empty list.
@@ -85,6 +86,6 @@ bindAlignCol bs = maximum (map nameLen bs)
 printLetBody :: HsExpr GhcPs -> Hattier
 printLetBody (HsLet _ nestedBinds nestedBody) =
   printLetExpr nestedBinds nestedBody
-printLetBody expr
-  -- TODO: here we kind of need to recurse into normal printing... 
- = append $ pprText expr
+printLetBody expr =
+  -- TODO: here we kind of need to recurse into normal printing...
+  append $ pprText expr

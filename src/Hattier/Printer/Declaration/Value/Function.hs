@@ -1,11 +1,12 @@
 module Hattier.Printer.Declaration.Value.Function
-  ( printFunBind
-  ) where
+  ( printFunBind,
+  )
+where
 
 import Control.Monad.RWS
 import Data.List (transpose)
-import qualified Data.Text as T
 import Data.Text (Text)
+import Data.Text qualified as T
 import GHC.Hs
 import GHC.Types.Name.Reader (RdrName)
 import GHC.Types.SrcLoc
@@ -15,11 +16,12 @@ import Hattier.Types
 import Language.Haskell.Syntax.Basic
 
 printFunBind ::
-     RdrName
-  -> [GenLocated
-        SrcSpanAnnA
-        (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs)))]
-  -> Hattier
+  RdrName ->
+  [ GenLocated
+      SrcSpanAnnA
+      (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs)))
+  ] ->
+  Hattier
 printFunBind name matches = do
   style <- asks (letAlignment . cfg)
   let fname = pprText name
@@ -27,29 +29,29 @@ printFunBind name matches = do
     PrimaryAlignment -> do
       let clausePatterns = [pats | L _ Match {m_pats = pats} <- matches]
           maxWidths = map (maximum . map patWidth) (transpose clausePatterns)
-        -- splitting up these cases enables us to only put
-        -- newlines in between declarations and not after the
-        -- final one.
+      -- splitting up these cases enables us to only put
+      -- newlines in between declarations and not after the
+      -- final one.
       case matches of
         [] -> pure ()
-        (x:xs) -> do
+        (x : xs) -> do
           printClause fname maxWidths x
           mapM_ (\clause -> newline >> printClause fname maxWidths clause) xs
     NoAlignment -> do
       -- See the comment at the above case expression
       case matches of
         [] -> pure ()
-        (x:xs) -> do
+        (x : xs) -> do
           append $ pprText x
           mapM_ (\match -> newline >> (append $ pprText match)) xs
 
 printClause ::
-     Text
-  -> [Int]
-  -> GenLocated
-       SrcSpanAnnA
-       (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs)))
-  -> Hattier
+  Text ->
+  [Int] ->
+  GenLocated
+    SrcSpanAnnA
+    (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))) ->
+  Hattier
 printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   append fname
   printPatsWithPadding (zip pats maxWidths)
@@ -57,7 +59,7 @@ printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   case grhss of
     GRHSs _ grhsList _ ->
       case grhsList of
-        (L _ (GRHS _ [] body)):_ -> append $ pprText (unLoc body) -- simple rhs
+        (L _ (GRHS _ [] body)) : _ -> append $ pprText (unLoc body) -- simple rhs
         _ -> undefined -- TODO: more complex rhs: guarded, multi-rhs, etc.
 
 -- This helper function makes sure we only add padding after a function
@@ -67,7 +69,7 @@ printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
 -- within patterns like those inside tuples.
 printPatsWithPadding :: [(LPat GhcPs, Int)] -> Hattier
 printPatsWithPadding [] = pure ()
-printPatsWithPadding ((pat, maxWidth):xs) = do
+printPatsWithPadding ((pat, maxWidth) : xs) = do
   append " "
   append $ pprText pat
   let padding = T.replicate (maxWidth - patWidth pat) " "

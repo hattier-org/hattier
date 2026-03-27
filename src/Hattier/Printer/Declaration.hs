@@ -1,6 +1,7 @@
 module Hattier.Printer.Declaration
-  ( printDecl
-  ) where
+  ( printDecl,
+  )
+where
 
 import GHC.Hs
 import GHC.Types.SrcLoc

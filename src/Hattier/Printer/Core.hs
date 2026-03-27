@@ -1,7 +1,7 @@
 module Hattier.Printer.Core where
 
 import Control.Monad.RWS
-import qualified Data.Text as T
+import Data.Text qualified as T
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
@@ -42,14 +42,13 @@ printImport :: LImportDecl GhcPs -> Hattier
 printImport (L _ ImportDecl {}) = pure ()
 
 printModDecls :: Hattier
-printModDecls
+printModDecls = do
+  source <- asks ast
   -- splitting up these cases enables us to only put
   -- newlines in between declarations and not after the
   -- final one.
- = do
-  source <- asks ast
   case hsmodDecls source of
     [] -> pure ()
-    d:ds -> do
+    d : ds -> do
       printDecl d
       mapM_ (\decl -> newline >> printDecl decl) ds
