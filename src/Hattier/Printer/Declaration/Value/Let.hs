@@ -1,4 +1,7 @@
-module Hattier.Format.Let where
+module Hattier.Printer.Declaration.Value.Let
+  ( printLetExpr,
+  )
+where
 
 import Control.Monad.RWS
 import Data.Text qualified as T
@@ -17,7 +20,6 @@ printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
   indW <- asks (fromIntegral . indentWidth . cfg)
   let bindList = bagToList binds
   case style of
-    OneLine -> printOneLineBinds bindList >> append " in " >> printLetBody (unLoc body)
     NoAlignment -> do
       let bindInd = T.replicate (indW + 4) " "
       let inInd = T.replicate indW " "
@@ -37,16 +39,6 @@ printLetExpr localBinds body = do
   let ind = T.replicate indW " "
   append $ pprText localBinds
   newline >> append ind >> append "in " >> printLetBody (unLoc body)
-
--- | @OneLine@: all bindings on one line separated by @; @.
---
---   let x = 1; longName = 2 in body
-printOneLineBinds :: [LHsBind GhcPs] -> Hattier
-printOneLineBinds [] = pure ()
-printOneLineBinds (b : bs) = do
-  append "let "
-  printBind 0 b
-  mapM_ (\bind -> append "; " >> printBind 0 bind) bs
 
 -- | Print a list of bindings multi-line, using @alignCol@ for padding.
 -- Pass @alignCol = 0@ for no alignment.
@@ -71,8 +63,8 @@ printBind alignCol (L _ (FunBind _ lname mg)) = do
   append name >> append padding >> append " = "
   case unLoc (mg_alts mg) of
     [L _ (Match _ _ [] (GRHSs _ [L _ (GRHS _ [] body)] _))] ->
-      -- Simple case: no patterns, no guards
       printLetBody (unLoc body)
+    -- Simple case: no patterns, no guards
     _ ->
       -- TODO: patterns and guards
       append "..."
@@ -87,8 +79,7 @@ bindAlignCol [] = 0
 bindAlignCol bs = maximum (map nameLen bs)
   where
     nameLen :: LHsBind GhcPs -> Int
-    nameLen (L _ (FunBind _ lname _)) =
-      T.length $ pprText $ unLoc lname
+    nameLen (L _ (FunBind _ lname _)) = T.length $ pprText $ unLoc lname
     nameLen _ = 0
 
 -- | Print the body of a @let@ expression, recursing into nested @let@s.

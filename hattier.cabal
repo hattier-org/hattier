@@ -33,17 +33,20 @@ library
     Hattier
     Hattier.Config
     Hattier.Format
-    Hattier.Format.Let
     Hattier.Parser
     Hattier.Printer.Combinators
     Hattier.Printer.Core
+    Hattier.Printer.Declaration
+    Hattier.Printer.Declaration.Value
+    Hattier.Printer.Declaration.Value.Function
+    Hattier.Printer.Declaration.Value.Let
     Hattier.Types
 
   build-depends:
     , base
     , data-default
     , dhall
-    , ghc-lib-parser ^>= 9.10.3
+    , ghc-lib-parser    ^>=9.10.3
     , mtl
     , optparse-generic
     , text
@@ -69,6 +72,7 @@ test-suite hattier-test
   main-is:        Main.hs
   other-modules:
     Unit.Format
+    Unit.Format.Function
     Unit.Format.Let
     Unit.Parser
 
@@ -76,10 +80,10 @@ test-suite hattier-test
     , base
     , data-default
     , filepath
-    , ghc-lib-parser ^>= 9.10.3
+    , ghc-lib-parser    ^>=9.10.3
     , hattier
-    , QuickCheck
     , optparse-generic
+    , QuickCheck
     , tasty
     , tasty-hunit
     , tasty-quickcheck

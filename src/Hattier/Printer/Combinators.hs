@@ -9,8 +9,7 @@ import Hattier.Types
 
 append :: Text -> Hattier
 append "" = pure ()
-append txt = do
-  modify' $ \s -> s {builder = builder s <> B.fromText txt}
+append txt = modify' $ \s -> s {builder = builder s <> B.fromText txt}
 
 newline :: Hattier
 newline = append "\n"
