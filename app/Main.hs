@@ -18,6 +18,7 @@ import Options.Generic (Unwrapped, getRecord, unHelpful, unwrap)
 import Paths_hattier qualified as Paths (version)
 import System.Directory (XdgDirectory (..), getCurrentDirectory, getXdgDirectory)
 import System.Exit (exitSuccess)
+import System.FilePath ((</>))
 import Prelude hiding (log)
 
 main :: IO ()
@@ -72,5 +73,5 @@ main = do
 loadDhallIfExists :: FilePath -> IO (Maybe (Config Unwrapped))
 loadDhallIfExists fp =
   catchIO
-    (Just <$> inputFile auto (fp <> "/hattier.dhall"))
+    (Just <$> inputFile auto (fp </> "hattier.dhall"))
     (const $ pure Nothing)

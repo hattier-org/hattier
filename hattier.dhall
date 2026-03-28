@@ -1,9 +1,9 @@
-Config {
-  indentWidth = 2,
-  letAlignment = PrimaryAlignment,
-  funcAlignment = PrimaryAlignment,
-  caseAlignment = PrimaryAlignment,
-  inPlace = False,
-  version = False,
-  defCfg = False
-  }
+let Alignment = < PrimaryAlignment | NoAlignment > in
+{ indentWidth = 2
+, letAlignment = Alignment.PrimaryAlignment
+, funcAlignment = Alignment.PrimaryAlignment
+, caseAlignment = Alignment.PrimaryAlignment
+, inPlace = False
+, version = False
+, defaultConfig = False
+}

@@ -63,6 +63,7 @@ executable hattier
     , data-default
     , dhall
     , directory
+    , filepath
     , hattier
     , optparse-generic
     , safe-exceptions
