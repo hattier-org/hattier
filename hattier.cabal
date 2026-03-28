@@ -38,6 +38,8 @@ library
     Hattier.Printer.Core
     Hattier.Printer.Declaration
     Hattier.Printer.Declaration.Value
+    Hattier.Printer.Declaration.Signature
+    Hattier.Printer.Declaration.Signature.Type
     Hattier.Printer.Declaration.Value.Function
     Hattier.Printer.Declaration.Value.Let
     Hattier.Printer.Expression

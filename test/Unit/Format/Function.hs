@@ -120,14 +120,10 @@ alignTupleFunc = expectedOutput @=? actualOutput
     expectedOutput =
       T.init $
         T.unlines
-          -- NOTE: the tick (') before the tuple type is something that
-          -- GHC's pretty printer does. This should be removed once we
-          -- have out own type signature printer
-          --
-          -- Also note that 'longArgName' should ideally be spaced one
+          -- Note that 'longArgName' should ideally be spaced one
           -- column to the right. This should be fixed in
           -- 'Hattier.Printer.Declaration.Value.Function.printPatsWithPadding'
-          [ "func :: '(Int, Int) -> Bool",
+          [ "func :: (Int, Int) -> Bool",
             "func (23, 2)          = True",
             "func (0, longArgName) = True",
             "func _                = False"

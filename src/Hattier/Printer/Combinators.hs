@@ -41,7 +41,7 @@ patWidth (L _ pat) =
       patWidth l + 1 + T.length (pprText name) + 1 + patWidth r -- " con "
     ConPat _ (L _ name) (PrefixCon _ args) ->
       T.length (pprText name) + sum (map (\a -> 1 + patWidth a) args)
-    ConPat _ (L _ name) (RecCon _) -> T.length $ pprText name -- TODO: recursion
+    ConPat _ (L _ name) (RecCon _) -> T.length $ pprText name -- TODO: records
     LitPat _ lit -> T.length $ pprText lit
     NPat _ (L _ lit) (Just _) _ -> 1 + (T.length $ pprText lit) -- "-"
     NPat _ (L _ lit) Nothing _ -> T.length $ pprText lit
