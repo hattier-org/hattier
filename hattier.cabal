@@ -46,7 +46,7 @@ library
     , base
     , data-default
     , dhall
-    , ghc-lib-parser    ^>=9.10.3
+    , ghc               ^>=9.10.3
     , mtl
     , optparse-generic
     , text
@@ -80,7 +80,7 @@ test-suite hattier-test
     , base
     , data-default
     , filepath
-    , ghc-lib-parser    ^>=9.10.3
+    , ghc               ^>=9.10.3
     , hattier
     , optparse-generic
     , QuickCheck
