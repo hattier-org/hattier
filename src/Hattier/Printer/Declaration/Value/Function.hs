@@ -69,12 +69,11 @@ printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
 -- within patterns like those inside tuples.
 printPatsWithPadding :: [(LPat GhcPs, Int)] -> Hattier
 printPatsWithPadding [] = pure ()
-printPatsWithPadding ((pat, maxWidth) : xs) = do
+printPatsWithPadding ((pat, maxWidth) : rest) = do
   append " "
   append $ pprText pat
-  let padding = T.replicate (maxWidth - patWidth pat) " "
-  append padding
-  mapM_ (\pat' -> (append padding) >> (append $ pprText pat')) xs
+  append $ T.replicate (maxWidth - patWidth pat) " "
+  printPatsWithPadding rest
 
 patWidth :: LPat GhcPs -> Int
 patWidth (L _ pat) =
