@@ -67,5 +67,5 @@ main = do
 loadDhallIfExists :: FilePath -> IO (Maybe (Config Unwrapped))
 loadDhallIfExists fp =
   catchIO
-    (Just <$> inputFile auto (fp <> "/hatier.dhall"))
+    (Just <$> inputFile auto (fp <> "/hattier.dhall"))
     (const $ pure Nothing)
