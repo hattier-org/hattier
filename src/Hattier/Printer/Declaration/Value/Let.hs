@@ -10,6 +10,7 @@ import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
+import Hattier.Printer.Expression
 import Hattier.Types
 
 -- | Pretty-print a @let ... in ...@ expression.
@@ -86,6 +87,4 @@ bindAlignCol bs = maximum (map nameLen bs)
 printLetBody :: HsExpr GhcPs -> Hattier
 printLetBody (HsLet _ nestedBinds nestedBody) =
   printLetExpr nestedBinds nestedBody
-printLetBody expr =
-  -- TODO: here we kind of need to recurse into normal printing...
-  append $ pprText expr
+printLetBody expr = printExpr expr
