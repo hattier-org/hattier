@@ -76,7 +76,7 @@ dontAlignSimpleModule = expectedOutput @=? actualOutput
       case parseTextToAST testInput1 defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    config = (def :: Config Unwrapped) {letAlignment = NoAlignment}
+    config = (def :: Config Unwrapped) {funcAlignment = NoAlignment}
     env = Env source config
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 

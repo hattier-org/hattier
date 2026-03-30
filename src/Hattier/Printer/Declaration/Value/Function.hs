@@ -23,7 +23,7 @@ printFunBind ::
   ] ->
   Hattier
 printFunBind name matches = do
-  style <- asks (letAlignment . cfg)
+  style <- asks (funcAlignment . cfg)
   let fname = pprText name
   case style of
     PrimaryAlignment -> do
