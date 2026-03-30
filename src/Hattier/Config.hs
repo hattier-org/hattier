@@ -24,6 +24,7 @@ data Config w = Config
   { indentWidth :: w ::: Natural <#> "w" <!> "2" <?> "The desired indentation width",
     letAlignment :: w ::: Alignment <#> "l" <!> "PrimaryAlignment" <?> "The alignment style for let-bindings: PrimaryAlignment or NoAlignment",
     funcAlignment :: w ::: Alignment <#> "f" <!> "PrimaryAlignment" <?> "The alignment style for function declarations: PrimaryAlignment or NoAlignment",
+    caseAlignment :: w ::: Alignment <#> "c" <!> "PrimaryAlignment" <?> "The alignment style for case expressions: PrimaryAlignment or NoAlignment",
     inPlace :: w ::: Bool <#> "i" <!> "false" <?> "edit files in place",
     version :: w ::: Bool <#> "v" <!> "false" <?> "hattier version",
     defaultConfig :: w ::: Bool <#> "d" <!> "false" <?> "Print out the default configuration file"

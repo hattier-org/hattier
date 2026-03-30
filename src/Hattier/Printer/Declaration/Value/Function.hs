@@ -12,8 +12,8 @@ import GHC.Types.Name.Reader (RdrName)
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
+import Hattier.Printer.Expression
 import Hattier.Types
-import Language.Haskell.Syntax.Basic
 
 printFunBind ::
   RdrName ->
@@ -59,7 +59,7 @@ printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   case grhss of
     GRHSs _ grhsList _ ->
       case grhsList of
-        (L _ (GRHS _ [] body)) : _ -> append $ pprText (unLoc body) -- simple rhs
+        (L _ (GRHS _ [] body)) : _ -> printExpr (unLoc body)
         _ -> undefined -- TODO: more complex rhs: guarded, multi-rhs, etc.
 
 -- This helper function makes sure we only add padding after a function
@@ -74,36 +74,3 @@ printPatsWithPadding ((pat, maxWidth) : rest) = do
   append $ pprText pat
   append $ T.replicate (maxWidth - patWidth pat) " "
   printPatsWithPadding rest
-
-patWidth :: LPat GhcPs -> Int
-patWidth (L _ pat) =
-  case pat of
-    -- In most cases where a specific integer is added to the width, the
-    -- comment after the case shows what that integer represents
-    WildPat _ -> 1
-    VarPat _ (L _ name) -> T.length (pprText name)
-    LazyPat _ pat' -> 1 + patWidth pat' -- "~"
-    AsPat _ (L _ name) pat' -> T.length (pprText name) + 1 + patWidth pat' -- "@"
-    ParPat _ pat' -> 2 + patWidth pat' -- "(" + ")"
-    BangPat _ pat' -> 1 + patWidth pat' -- "!"
-    ListPat _ pats -> 2 + sum (map patWidth pats) + max 0 (length pats - 1) * 2 -- "[" + "]" + commas: ", "
-    TuplePat _ pats Boxed ->
-      2 + sum (map patWidth pats) + max 0 (length pats - 1) * 2 -- "(" + ")" + commas: ", "
-    TuplePat _ pats Unboxed ->
-      4 + sum (map patWidth pats) + max 0 (length pats - 1) * 2 -- "(#" + "#)" + commas: ", "
-    ConPat _ (L _ name) (InfixCon l r) ->
-      patWidth l + 1 + T.length (pprText name) + 1 + patWidth r -- " con "
-    ConPat _ (L _ name) (PrefixCon _ args) ->
-      T.length (pprText name) + sum (map (\a -> 1 + patWidth a) args)
-    ConPat _ (L _ name) (RecCon _) -> T.length $ pprText name -- TODO: recursion
-    LitPat _ lit -> T.length $ pprText lit
-    NPat _ (L _ lit) (Just _) _ -> 1 + (T.length $ pprText lit) -- "-"
-    NPat _ (L _ lit) Nothing _ -> T.length $ pprText lit
-    SigPat _ pat' sig -> 2 + patWidth pat' + 4 + (T.length $ pprText sig) -- "(" + " :: " + ")"
-    -- TODO: the following require certain language extensions
-    SumPat _ _ _ _ -> undefined -- UnboxedSums extension
-    ViewPat _ _ _ -> undefined -- ViewPatterns extension
-    SplicePat _ _ -> undefined -- TemplateHaskell extension
-    NPlusKPat _ _ _ _ _ _ -> undefined -- NPlusKPatterns extension
-    EmbTyPat _ _ -> undefined -- ExplicitNamespaces and RequiredTypeArguments extensions
-    InvisPat _ _ -> undefined -- TypeAbstractions extension
