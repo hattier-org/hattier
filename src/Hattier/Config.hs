@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -41,9 +42,26 @@ data Alignment
 instance ParseRecord CLI where
   parseRecord = CLI <$> parseRecord <*> parseRecord
 
-instance ParseRecord (Config Wrapped)
+instance Show (Config Unwrapped) where
+  show Config {..} =
+    "let Alignment = < PrimaryAlignment | NoAlignment > in\n"
+      <> "{ indentWidth = "
+      <> show indentWidth
+      <> "\n, letAlignment = Alignment."
+      <> show letAlignment
+      <> "\n, funcAlignment = Alignment."
+      <> show funcAlignment
+      <> "\n, caseAlignment = Alignment."
+      <> show caseAlignment
+      <> "\n, inPlace = "
+      <> show inPlace
+      <> "\n, version = "
+      <> show version
+      <> "\n, defaultConfig = "
+      <> show defaultConfig
+      <> "\n}"
 
-deriving instance Show (Config Unwrapped)
+instance ParseRecord (Config Wrapped)
 
 deriving instance FromDhall (Config Unwrapped)
 
