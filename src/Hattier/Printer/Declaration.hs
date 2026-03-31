@@ -6,8 +6,8 @@ where
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
-import Hattier.Printer.Declaration.Value
 import Hattier.Printer.Declaration.Signature
+import Hattier.Printer.Declaration.Value
 import Hattier.Types
 
 printDecl :: LHsDecl GhcPs -> Hattier

@@ -37,9 +37,9 @@ library
     Hattier.Printer.Combinators
     Hattier.Printer.Core
     Hattier.Printer.Declaration
-    Hattier.Printer.Declaration.Value
     Hattier.Printer.Declaration.Signature
     Hattier.Printer.Declaration.Signature.Type
+    Hattier.Printer.Declaration.Value
     Hattier.Printer.Declaration.Value.Function
     Hattier.Printer.Declaration.Value.Let
     Hattier.Printer.Expression
@@ -81,6 +81,7 @@ test-suite hattier-test
     Unit.Format.Case
     Unit.Format.Function
     Unit.Format.Let
+    Unit.Format.TypeSig
     Unit.Parser
 
   build-depends:
