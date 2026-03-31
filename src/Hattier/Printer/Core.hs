@@ -51,4 +51,11 @@ printModDecls = do
     [] -> pure ()
     d : ds -> do
       printDecl d
-      mapM_ (\decl -> newline >> printDecl decl) ds
+      -- Make sure that type signatures "stick to" their respective
+      -- declarations
+      mapM_
+        ( \(prev, cur) -> case prev of
+            L _ (SigD _ _) -> newline >> printDecl cur
+            _ -> newline >> newline >> printDecl cur
+        )
+        (zip (d : ds) ds)
