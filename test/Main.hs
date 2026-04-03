@@ -1,5 +1,6 @@
 module Main where
 
+import Integration qualified as Integration (tests)
 import Test.Tasty (TestTree, defaultMain, testGroup)
 import Unit.Format qualified as Format (tests)
 import Unit.Parser qualified as Parser (tests)
@@ -11,7 +12,8 @@ tests :: TestTree
 tests =
   testGroup
     "Hattier tests"
-    [ units
+    [ units,
+      Integration.tests
     -- , properties
     -- , spec
     ]
