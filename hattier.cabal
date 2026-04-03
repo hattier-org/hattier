@@ -83,6 +83,7 @@ test-suite hattier-test
     Unit.Format
     Unit.Format.Case
     Unit.Format.Function
+    Unit.Format.Guard
     Unit.Format.Let
     Unit.Format.TypeSig
     Unit.Parser

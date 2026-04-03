@@ -27,7 +27,7 @@ tests =
         alignListFunc,
       testCase
         "PrimaryAlignment: align a function with a tuple pattern correctly"
-        alignTupleFunc
+        alignTupleFunc,
     ]
 
 testInput1 :: Text
@@ -134,3 +134,4 @@ alignTupleFunc = expectedOutput @=? actualOutput
         Left err -> error $ "test fixture failed to parse: " <> show err
     env = Env source def
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
+
