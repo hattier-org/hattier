@@ -12,6 +12,7 @@ import GHC.Types.Name.Reader (RdrName)
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
+import Hattier.Printer.Declaration.Value.Let
 import Hattier.Printer.Expression
 import Hattier.Types
 
@@ -53,13 +54,18 @@ printClause ::
     (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))) ->
   Hattier
 printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
+  indW <- asks (fromIntegral . indentWidth . cfg)
   append fname
   printPatsWithPadding (zip pats maxWidths)
-  append " = "
   case grhss of
     GRHSs _ grhsList _ ->
       case grhsList of
-        (L _ (GRHS _ [] body)) : _ -> printExpr (unLoc body)
+        (L _ (GRHS _ [] body)) : _ -> case unLoc body of
+          HsLet _ binds letBody ->
+            -- Break let to its own indented line so that 'in' can be correctly
+            -- placed at column indW, matching the 'let' keyword column.
+            append " =" >> newline >> append (T.replicate indW " ") >> printLetExpr binds letBody
+          _ -> append " = " >> printExpr (unLoc body)
         _ -> undefined -- TODO: more complex rhs: guarded, multi-rhs, etc.
 
 -- This helper function makes sure we only add padding after a function
