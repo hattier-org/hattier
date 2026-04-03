@@ -23,7 +23,11 @@ tests =
     [ testCase "NoAlignment: bindings uniformly indented" noAlignmentTest,
       testCase "PrimaryAlignment: '=' signs aligned" primaryAlignmentTest,
       testCase "NoAlignment: nested let in body" nestedNoAlignmentTest,
-      testCase "PrimaryAlignment: nested let, each block aligns" nestedPrimaryAlignmentTest
+      testCase "PrimaryAlignment: nested let, each block aligns" nestedPrimaryAlignmentTest,
+      testCase "#32: let binding with a pattern argument" letBindingWithPattern,
+      testCase "#32: let bindings with multiple pattern arguments align correctly" letBindingsMultiplePatterns,
+      testCase "#32: let binding whose body is a case expression" letBindingWithCase,
+      testCase "#32: let binding with guards" letBindingWithGuards
     ]
 
 -- | Run only the let printer against the first let expression found in @src@.
@@ -93,3 +97,65 @@ nestedPrimaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment nestedL
   where
     -- outer block: "longName" (8) drives alignment; inner block: "result" (6) drives its own
     expected = "let x        = 1\n      longName = 2\n  in let result = x\n  in result"
+
+--- #32 test cases ---
+
+-- | A let binding whose RHS is a function with one pattern argument.
+-- Currently hits the @_ -> append "..."@ fallback in 'printBind'.
+letBindingWithPattern :: IO ()
+letBindingWithPattern = expected @=? runLetPrinter PrimaryAlignment src
+  where
+    src =
+      T.unlines
+        [ "module T where",
+          "f = let g x = x + 1",
+          "    in g 5"
+        ]
+    -- Single binding, so PrimaryAlignment adds no padding (alignCol = len "g" = 1).
+    expected = "let g x = x + 1\n  in g 5"
+
+-- | Two let bindings each with two pattern arguments; PrimaryAlignment aligns '='.
+letBindingsMultiplePatterns :: IO ()
+letBindingsMultiplePatterns = expected @=? runLetPrinter PrimaryAlignment src
+  where
+    src =
+      T.unlines
+        [ "module T where",
+          "f = let add x y = x + y",
+          "        sub x y = x - y",
+          "    in add 1 2"
+        ]
+    -- "add" and "sub" are both 3 chars, so alignCol = 3, no extra padding.
+    expected = "let add x y = x + y\n      sub x y = x - y\n  in add 1 2"
+
+-- | A let binding with a pattern argument whose body is a case expression.
+-- Requires both pattern support (#32) and correct case-in-let indentation.
+letBindingWithCase :: IO ()
+letBindingWithCase = expected @=? runLetPrinter PrimaryAlignment src
+  where
+    src =
+      T.unlines
+        [ "module T where",
+          "f = let g x = case x of",
+          "                  0 -> True",
+          "                  _ -> False",
+          "    in g 5"
+        ]
+    -- Case branches are indented by indentWidth (2) from the start of the line.
+    expected = "let g x = case x of\n  0 -> True\n  _ -> False\n  in g 5"
+
+-- | A let binding with guards on the RHS.
+-- Both guards and their '=' signs should align under PrimaryAlignment.
+letBindingWithGuards :: IO ()
+letBindingWithGuards = expected @=? runLetPrinter PrimaryAlignment src
+  where
+    src =
+      T.unlines
+        [ "module T where",
+          "f = let g x",
+          "          | x > 0     = 1",
+          "          | otherwise = 0",
+          "    in g 5"
+        ]
+    -- Guards are indented by bindInd (indentWidth + 4 = 6 spaces) from the line start.
+    expected = "let g x\n      | x > 0     = 1\n      | otherwise = 0\n  in g 5"
