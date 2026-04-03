@@ -27,7 +27,7 @@ tests =
         alignListFunc,
       testCase
         "PrimaryAlignment: align a function with a tuple pattern correctly"
-        alignTupleFunc,
+        alignTupleFunc
     ]
 
 testInput1 :: Text

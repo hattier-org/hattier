@@ -41,6 +41,7 @@ library
     Hattier.Printer.Declaration.Signature.Type
     Hattier.Printer.Declaration.Value
     Hattier.Printer.Declaration.Value.Function
+    Hattier.Printer.Declaration.Value.Guard
     Hattier.Printer.Declaration.Value.Let
     Hattier.Printer.Expression
     Hattier.Types

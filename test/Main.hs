@@ -14,8 +14,8 @@ tests =
     "Hattier tests"
     [ units,
       Integration.tests
-    -- , properties
-    -- , spec
+      -- , properties
+      -- , spec
     ]
 
 units :: TestTree
