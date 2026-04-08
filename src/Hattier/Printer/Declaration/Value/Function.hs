@@ -69,7 +69,7 @@ printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
           _ -> append " = " >> printExpr (unLoc body)
         _ ->
           -- Guarded RHS: each guard on its own indented line.
-          mapM_ (printGuard (T.replicate indW " ") printExpr) grhsList
+          mapM_ (\grhs -> newline >> printGuard (T.replicate indW " ") printExpr grhs) grhsList
 
 -- This helper function makes sure we only add padding after a function
 -- argument if it isn't the last argument

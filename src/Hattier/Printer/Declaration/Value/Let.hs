@@ -74,7 +74,7 @@ printBind bindInd alignCol (L _ (FunBind _ lname mg)) = do
         _ -> do
           -- Guarded: emit patterns then each guard on its own line
           mapM_ (\p -> append " " >> append (pprText p)) pats
-          mapM_ (printGuard bindInd printLetBody) grhsList
+          mapM_ (\grhs -> newline >> printGuard bindInd printLetBody grhs) grhsList
     -- Empty or multi-clause let bindings are not valid Haskell and
     -- cannot be produced by GHC's parser, so these branches are unreachable.
     -- still, we need to handle them to satisfy the type checker.
