@@ -34,7 +34,7 @@ printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
       let alignCol = bindAlignCol bindList
       append "let "
       printBinds bindInd alignCol bindList
-      newline >> append inInd >> append "in " >> printLetBody (unLoc body)
+      newline >> append inInd >> append "in  " >> printLetBody (unLoc body)
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
   indW <- asks (fromIntegral . indentWidth . cfg)

@@ -59,7 +59,7 @@ letInFunctionBodyPrimary = expected @=? runFullFormatter letInFunctionBodySrc
             "greet _ =",
             "  let hello  = greet 0",
             "      course = greet 1",
-            "  in hello ++ course"
+            "  in  hello ++ course"
           ]
 
 -- | funcAlignment=NoAlignment: the whole match clause goes through pprText,
