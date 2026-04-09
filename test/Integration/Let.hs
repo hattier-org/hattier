@@ -15,14 +15,8 @@ tests :: TestTree
 tests =
   testGroup
     "Let integration tests"
-    -- funcAlignment drives which code path handles the function body.
-    -- PrimaryAlignment uses printClause, which calls printExpr on the body.
-    -- printExpr does not handle HsLet, so it falls through to pprText, placing
-    -- 'in' at column 0 - invalid Haskell. NoAlignment uses pprText for the whole
-    -- match clause, which always produces valid output.
-    -- letAlignment does not affect this routing, so only funcAlignment matters.
-    [ testCase "#37: funcAlignment=PrimaryAlignment (default) - 'in' incorrectly at col 0" letInFunctionBodyPrimary,
-      testCase "#37: funcAlignment=NoAlignment - valid output via pprText fallback" letInFunctionBodyNoAlign
+    [ testCase "#37: funcAlignment=PrimaryAlignment (default) - let body formatted correctly" letInFunctionBodyPrimary,
+      testCase "#37: funcAlignment=NoAlignment - valid output with let-binding formatting" letInFunctionBodyNoAlign
     ]
 
 --- #37 regression tests ---
@@ -42,9 +36,7 @@ letInFunctionBodySrc =
       "      in hello ++ course"
     ]
 
--- | Default config (funcAlignment=PrimaryAlignment): the failing case.
--- printClause calls printExpr on the HsLet body, which falls through to pprText
--- and produces 'in' at column 0, breaking the GHC parser.
+-- | Default config (funcAlignment=PrimaryAlignment).
 letInFunctionBodyPrimary :: IO ()
 letInFunctionBodyPrimary = expected @=? runFullFormatter letInFunctionBodySrc
   where
@@ -62,8 +54,8 @@ letInFunctionBodyPrimary = expected @=? runFullFormatter letInFunctionBodySrc
             "  in  hello ++ course"
           ]
 
--- | funcAlignment=NoAlignment: the whole match clause goes through pprText,
--- which always produces valid Haskell. This combination already works.
+-- | funcAlignment=NoAlignment: patterns are not padded, but the let body
+-- still goes through printLetExpr and produces valid layout.
 letInFunctionBodyNoAlign :: IO ()
 letInFunctionBodyNoAlign = expected @=? runFullFormatterWith config letInFunctionBodySrc
   where
@@ -76,9 +68,8 @@ letInFunctionBodyNoAlign = expected @=? runFullFormatterWith config letInFunctio
             "greet :: Int -> String",
             "greet 0 = \"Hello\"",
             "greet 1 = \" INFOAFP\"",
-            "greet _",
-            "  = let",
-            "      hello = greet 0",
+            "greet _ =",
+            "  let hello  = greet 0",
             "      course = greet 1",
-            "    in hello ++ course"
+            "  in  hello ++ course"
           ]

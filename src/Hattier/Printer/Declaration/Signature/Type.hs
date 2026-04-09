@@ -17,9 +17,9 @@ printTypeSig names (HsWC {hswc_body = L _ sig}) = do
 
 printNames :: [LIdP GhcPs] -> Hattier
 printNames [] = pure ()
-printNames [(L _ name)] = append $ pprText name
+printNames [(L _ name)] = fallback name
 printNames ((L _ name) : rest) = do
-  append $ pprText name
+  fallback name
   append ", "
   printNames rest
 
@@ -38,13 +38,13 @@ printHsSigType (HsSig {sig_bndrs = outerForall, sig_body = body}) = do
 printForallVars :: [LHsTyVarBndr Specificity (NoGhcTc GhcPs)] -> Hattier
 printForallVars [] = pure ()
 printForallVars (var : vars) = do
-  append $ pprText var
+  fallback var
   append " "
   printForallVars vars
 
 printLHsType :: LHsType GhcPs -> Hattier
 printLHsType (L _ ty) = case ty of
-  HsTyVar _ _ (L _ name) -> append $ pprText name
+  HsTyVar _ _ (L _ name) -> fallback name
   HsAppTy _ f a -> do
     printLHsType f
     append " "
@@ -52,7 +52,7 @@ printLHsType (L _ ty) = case ty of
   HsAppKindTy _ t k -> do
     printLHsType t
     append " "
-    append $ pprText k
+    fallback k
   HsFunTy _ _ arg res -> do
     printLHsType arg
     append " -> "
@@ -72,7 +72,7 @@ printLHsType (L _ ty) = case ty of
   HsOpTy _ _ l op r -> do
     printLHsType l
     append " "
-    append $ pprText op
+    fallback op
     append " "
     printLHsType r
   HsParTy _ t -> do
@@ -91,7 +91,7 @@ printLHsType (L _ ty) = case ty of
     append "("
     printNestedStructure ts
     append ")"
-  HsTyLit _ lit -> append $ pprText lit
+  HsTyLit _ lit -> fallback lit
   HsWildCardTy _ -> append "_"
   HsBangTy _ _ t -> do append "!"; printLHsType t
   -- TODO:
@@ -110,7 +110,7 @@ printLHsType (L _ ty) = case ty of
   -- HsDocTy _ _ _ -> undefined
   -- HsRecTy _ _ -> undefined
   -- XHsType _ -> undefined
-  _ -> append $ pprText ty -- fallback
+  _ -> fallback ty
 
 printNestedStructure :: [LHsType GhcPs] -> Hattier
 printNestedStructure [] = pure ()

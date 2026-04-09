@@ -3,11 +3,8 @@ module Hattier.Format
   )
 where
 
-import Hattier.Printer.Core
+import Hattier.Printer.Module
 import Hattier.Types
 
 fmt :: Hattier
-fmt = do
-  printModHeader
-  printModImports
-  printModDecls
+fmt = printModule

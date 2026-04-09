@@ -13,4 +13,4 @@ printValueDecl :: HsBind GhcPs -> Hattier
 -- function declarations
 printValueDecl (FunBind {fun_id = L _ name, fun_matches = MG _ (L _ matches)}) =
   printFunBind name matches
-printValueDecl bind = append $ pprText bind
+printValueDecl bind = fallback bind

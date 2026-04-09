@@ -13,4 +13,4 @@ import Hattier.Types
 printDecl :: LHsDecl GhcPs -> Hattier
 printDecl (L _ (ValD _ bind)) = printValueDecl bind
 printDecl (L _ (SigD _ sig)) = printSignature sig
-printDecl decl = append $ pprText decl -- NOTE: default fallback
+printDecl decl = fallback decl

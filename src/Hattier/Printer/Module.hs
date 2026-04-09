@@ -1,5 +1,6 @@
-module Hattier.Printer.Core where
+module Hattier.Printer.Module (printModule) where
 
+import Control.Monad (when)
 import Control.Monad.RWS
 import Data.Text qualified as T
 import GHC.Hs
@@ -7,6 +8,12 @@ import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Printer.Declaration
 import Hattier.Types
+
+printModule :: Hattier
+printModule = do
+  printModHeader
+  printModImports
+  printModDecls
 
 printModHeader :: Hattier
 printModHeader = do
@@ -17,7 +24,7 @@ printModHeader = do
     Just (L _ n) -> do
       append "module "
       printModName n
-      -- parse module exports
+      -- print module exports
       case hsmodExports source of
         Nothing -> pure ()
         Just exps -> printModExports exps
@@ -35,11 +42,42 @@ printModExports _ = pure ()
 printModImports :: Hattier
 printModImports = do
   source <- asks ast
-  mapM_ printImport (hsmodImports source)
+  case hsmodImports source of
+    [] -> pure ()
+    imports -> do
+      withSep newline $ map printImport imports
+      -- We don't print trailing newlines when there are only
+      -- imports in the module (and potentially a module header
+      -- and exports)
+      case hsmodDecls source of
+        [] -> pure ()
+        _ -> newline >> newline
 
--- TODO: append an import statement (including qualified, as, etc.)
 printImport :: LImportDecl GhcPs -> Hattier
-printImport (L _ ImportDecl {}) = pure ()
+printImport (L _ imp) = do
+  append "import "
+
+  when (ideclQualified imp /= NotQualified) $
+    append "qualified "
+
+  fallback (unLoc (ideclName imp))
+
+  case ideclAs imp of
+    Nothing -> pure ()
+    Just (L _ asName) ->
+      append " as " >> fallback asName
+
+  -- import list / hiding
+  case ideclImportList imp of
+    Nothing -> pure ()
+    Just (hidingFlag, (L _ names)) -> do
+      case hidingFlag of
+        EverythingBut -> append " hiding"
+        Exactly -> pure ()
+
+      append " ("
+      withSep (append ", ") $ map (fallback . unLoc) names
+      append ")"
 
 printModDecls :: Hattier
 printModDecls = do
