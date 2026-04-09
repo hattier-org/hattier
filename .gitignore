@@ -2,3 +2,6 @@
 result
 dist-newstyle
 hattier.log
+/.hpc
+/tix
+*.tix
