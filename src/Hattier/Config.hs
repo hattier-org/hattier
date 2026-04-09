@@ -4,24 +4,24 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Hattier.Config where
 
 import Data.Default (Default, def)
 import Data.Maybe (fromJust)
-import Dhall (FromDhall(..), ToDhall(..), Natural)
+import Data.Proxy
+import Dhall (FromDhall (..), Natural, ToDhall (..))
 import qualified Dhall
 import qualified Dhall.Core as Dhall
 import qualified Dhall.Marshal.Encode as Dhall ()
 import GHC.Generics
 import Options.Generic
-import Data.Proxy
 
 ------------------
 -- Mode tagging --
@@ -29,47 +29,46 @@ import Data.Proxy
 
 data Mode = Ephemeral | Persistant
 
-newtype (<@>) field (mode :: Mode) = ModeTag { unModeTag :: field }
+newtype (<@>) field (mode :: Mode) = ModeTag {unModeTag :: field}
   deriving (Generic, Show)
 
 infixl 1 <@>
 
-deriving instance Eq a => Eq (a <@> m)
+deriving instance (Eq a) => Eq (a <@> m)
 
-
-instance ParseField a => ParseField (a <@> m) where
+instance (ParseField a) => ParseField (a <@> m) where
   parseField h mname c d = ModeTag <$> parseField h mname c d
   readField = ModeTag <$> readField
   metavar _ = metavar (Proxy :: Proxy a)
 
-instance ParseFields a => ParseFields (a <@> m) where
+instance (ParseFields a) => ParseFields (a <@> m) where
   parseFields h mname c d = ModeTag <$> parseFields h mname c d
 
-instance ParseFields a => ParseRecord (a <@> m)
+instance (ParseFields a) => ParseRecord (a <@> m)
 
-instance FromDhall a => FromDhall (a <@> 'Persistant) where
+instance (FromDhall a) => FromDhall (a <@> 'Persistant) where
   autoWith norm = ModeTag <$> autoWith norm
 
-instance ToDhall a => ToDhall (a <@> 'Persistant) where
+instance (ToDhall a) => ToDhall (a <@> 'Persistant) where
   injectWith norm =
     let enc = injectWith norm
-    in Dhall.Encoder
-         { Dhall.embed = \(ModeTag x) -> Dhall.embed enc x
-         , Dhall.declared = Dhall.declared enc
-         }
+     in Dhall.Encoder
+          { Dhall.embed = \(ModeTag x) -> Dhall.embed enc x,
+            Dhall.declared = Dhall.declared enc
+          }
 
-instance Default a => FromDhall (a <@> Ephemeral) where
+instance (Default a) => FromDhall (a <@> Ephemeral) where
   autoWith _ =
     Dhall.Decoder
-      { Dhall.extract  = \_ -> pure (ModeTag def)
-      , Dhall.expected = pure (Dhall.Record mempty)
+      { Dhall.extract = \_ -> pure (ModeTag def),
+        Dhall.expected = pure (Dhall.Record mempty)
       }
 
 instance ToDhall (a <@> 'Ephemeral) where
   injectWith _ =
     Dhall.Encoder
-      { Dhall.embed = const (Dhall.RecordLit mempty)
-      , Dhall.declared = Dhall.Record mempty
+      { Dhall.embed = const (Dhall.RecordLit mempty),
+        Dhall.declared = Dhall.Record mempty
       }
 
 ----------------------------------------
