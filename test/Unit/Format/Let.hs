@@ -10,7 +10,7 @@ import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Parser
-import Hattier.Printer.Declaration.Value.Let
+import Hattier.Printer.Expression (printLetExpr)
 import Hattier.Types
 import Options.Generic (Unwrapped)
 import Test.Tasty (TestTree, testGroup)
@@ -67,7 +67,7 @@ letSrc =
 noAlignmentTest :: IO ()
 noAlignmentTest = expected @=? runLetPrinter NoAlignment letSrc
   where
-    expected = "let x = 1\n      longName = 2\n  in x"
+    expected = "let x = 1\n      longName = 2\n  in  x"
 
 primaryAlignmentTest :: IO ()
 primaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment letSrc
@@ -90,7 +90,7 @@ nestedLetSrc =
 nestedNoAlignmentTest :: IO ()
 nestedNoAlignmentTest = expected @=? runLetPrinter NoAlignment nestedLetSrc
   where
-    expected = "let x = 1\n      longName = 2\n  in let result = x\n  in result"
+    expected = "let x = 1\n      longName = 2\n  in  let result = x\n  in  result"
 
 nestedPrimaryAlignmentTest :: IO ()
 nestedPrimaryAlignmentTest = expected @=? runLetPrinter PrimaryAlignment nestedLetSrc

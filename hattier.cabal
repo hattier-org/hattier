@@ -35,15 +35,15 @@ library
     Hattier.Format
     Hattier.Parser
     Hattier.Printer.Combinators
-    Hattier.Printer.Core
     Hattier.Printer.Declaration
     Hattier.Printer.Declaration.Signature
     Hattier.Printer.Declaration.Signature.Type
     Hattier.Printer.Declaration.Value
     Hattier.Printer.Declaration.Value.Function
-    Hattier.Printer.Declaration.Value.Guard
-    Hattier.Printer.Declaration.Value.Let
     Hattier.Printer.Expression
+    Hattier.Printer.Module
+    Hattier.Printer.Pattern
+    Hattier.Printer.Utils
     Hattier.Types
 
   build-depends:
@@ -81,6 +81,7 @@ test-suite hattier-test
     Integration
     Integration.Helpers
     Integration.Let
+    Integration.Module
     Unit.Format
     Unit.Format.Case
     Unit.Format.Function

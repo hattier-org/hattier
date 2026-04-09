@@ -1,4 +1,4 @@
-module Hattier.Printer.Core where
+module Hattier.Printer.Module (printModule) where
 
 import Control.Monad.RWS
 import Data.Text qualified as T
@@ -7,6 +7,12 @@ import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Printer.Declaration
 import Hattier.Types
+
+printModule :: Hattier
+printModule = do
+  printModHeader
+  printModImports
+  printModDecls
 
 printModHeader :: Hattier
 printModHeader = do

@@ -1,4 +1,4 @@
-module Integration.Let
+module Integration.Module
   ( tests,
   )
 where
@@ -14,7 +14,7 @@ import Test.Tasty.HUnit (testCase, (@=?))
 tests :: TestTree
 tests =
   testGroup
-    "Let integration tests"
+    "Module integration tests"
     [ testCase "#37: funcAlignment=PrimaryAlignment (default) - let body formatted correctly" letInFunctionBodyPrimary,
       testCase "#37: funcAlignment=NoAlignment - valid output with let-binding formatting" letInFunctionBodyNoAlign
     ]

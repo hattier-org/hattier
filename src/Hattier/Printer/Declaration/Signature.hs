@@ -10,4 +10,4 @@ import Hattier.Types
 
 printSignature :: Sig GhcPs -> Hattier
 printSignature (TypeSig _ names sigType) = printTypeSig names sigType
-printSignature sig = append $ pprText sig
+printSignature sig = fallback sig
