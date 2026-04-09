@@ -1,17 +1,18 @@
 module Hattier.Printer.Expression (printExpr) where
 
 import Control.Monad.RWS
+import Data.List (transpose)
 import Data.Text (Text)
 import Data.Text qualified as T
-import Data.List (transpose)
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
 import Hattier.Types
 
-data FlatPat = FlatCon Text [Text]
-             | FlatOther Text
+data FlatPat
+  = FlatCon Text [Text]
+  | FlatOther Text
 
 printExpr :: HsExpr GhcPs -> Hattier
 printExpr (HsCase _ scrut mg) = printCaseExpr scrut mg
@@ -109,5 +110,7 @@ flattenPat (L _ pat) =
       FlatOther (pprText pat)
 
 collectCols :: [FlatPat] -> [[Text]]
-collectCols pats = [ name : args
-                   | FlatCon name args <- pats ]
+collectCols pats =
+  [ name : args
+  | FlatCon name args <- pats
+  ]
