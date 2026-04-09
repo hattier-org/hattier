@@ -72,12 +72,12 @@ printImportList = expectedOutput @=? actualOutput
         T.unlines
           [ "module ManyImports where",
             "",
-            "import Data.Text qualified as T",
+            "import qualified Data.Text as T",
             "import GHC.Hs",
             "import Test.Tasty.HUnit (testCase, (@=?))",
             "import GHC.Types.SrcLoc",
             "import Hattier.Config",
-            "import Data.Text.Lazy qualified as T.Lazy",
+            "import qualified Data.Text.Lazy as T.Lazy",
             "import Hattier.Parser",
             "import Hattier.Types",
             "import Options.Generic (Unwrapped)",
@@ -115,7 +115,7 @@ printModuleWithImports = expectedOutput @=? actualOutput
         T.unlines
           [ "module ModuleWithImports where",
             "",
-            "import Data.Text qualified as T",
+            "import qualified Data.Text as T",
             "import GHC.Hs",
             "import Test.Tasty.HUnit (testCase, (@=?))",
             "import GHC.Types.SrcLoc",
