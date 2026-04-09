@@ -6,28 +6,88 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Hattier.Config where
 
 import Data.Default (Default, def)
 import Data.Maybe (fromJust)
-import Dhall (FromDhall, Natural)
-import Dhall.Marshal.Encode (ToDhall)
+import Dhall (FromDhall(..), ToDhall(..), Natural)
+import qualified Dhall
+import qualified Dhall.Core as Dhall
+import qualified Dhall.Marshal.Encode as Dhall ()
 import GHC.Generics
 import Options.Generic
+import Data.Proxy
+
+------------------
+-- Mode tagging --
+------------------
+
+data Mode = Ephemeral | Persistant
+
+newtype (<@>) field (mode :: Mode) = ModeTag { unModeTag :: field }
+  deriving (Generic, Show)
+
+infixl 1 <@>
+
+deriving instance Eq a => Eq (a <@> m)
+
+
+instance ParseField a => ParseField (a <@> m) where
+  parseField h mname c d = ModeTag <$> parseField h mname c d
+  readField = ModeTag <$> readField
+  metavar _ = metavar (Proxy :: Proxy a)
+
+instance ParseFields a => ParseFields (a <@> m) where
+  parseFields h mname c d = ModeTag <$> parseFields h mname c d
+
+instance ParseFields a => ParseRecord (a <@> m)
+
+instance FromDhall a => FromDhall (a <@> 'Persistant) where
+  autoWith norm = ModeTag <$> autoWith norm
+
+instance ToDhall a => ToDhall (a <@> 'Persistant) where
+  injectWith norm =
+    let enc = injectWith norm
+    in Dhall.Encoder
+         { Dhall.embed = \(ModeTag x) -> Dhall.embed enc x
+         , Dhall.declared = Dhall.declared enc
+         }
+
+instance Default a => FromDhall (a <@> Ephemeral) where
+  autoWith _ =
+    Dhall.Decoder
+      { Dhall.extract  = \_ -> pure (ModeTag def)
+      , Dhall.expected = pure (Dhall.Record mempty)
+      }
+
+instance ToDhall (a <@> 'Ephemeral) where
+  injectWith _ =
+    Dhall.Encoder
+      { Dhall.embed = const (Dhall.RecordLit mempty)
+      , Dhall.declared = Dhall.Record mempty
+      }
+
+----------------------------------------
+-- CLI wrapper
+----------------------------------------
 
 data CLI = CLI (Config Wrapped) PosArg deriving (Generic)
 
 newtype PosArg = PosArg (Maybe FilePath <?> "file name") deriving (Generic, ParseRecord)
 
 data Config w = Config
-  { indentWidth :: w ::: Natural <#> "w" <!> "2" <?> "The desired indentation width",
-    letAlignment :: w ::: Alignment <#> "l" <!> "PrimaryAlignment" <?> "The alignment style for let-bindings: PrimaryAlignment or NoAlignment",
-    funcAlignment :: w ::: Alignment <#> "f" <!> "PrimaryAlignment" <?> "The alignment style for function declarations: PrimaryAlignment or NoAlignment",
-    caseAlignment :: w ::: Alignment <#> "c" <!> "PrimaryAlignment" <?> "The alignment style for case expressions: PrimaryAlignment or NoAlignment",
-    inPlace :: w ::: Bool <#> "i" <!> "false" <?> "edit files in place",
-    version :: w ::: Bool <#> "v" <!> "false" <?> "hattier version",
-    defaultConfig :: w ::: Bool <#> "d" <!> "false" <?> "Print out the default configuration file"
+  { indentWidth :: w ::: (Natural <@> 'Persistant) <#> "w" <!> "2" <?> "The desired indentation width",
+    letAlignment :: w ::: (Alignment <@> 'Persistant) <#> "l" <!> "PrimaryAlignment" <?> "The alignment style for let-bindings: PrimaryAlignment or NoAlignment",
+    funcAlignment :: w ::: (Alignment <@> 'Persistant) <#> "f" <!> "PrimaryAlignment" <?> "The alignment style for function declarations: PrimaryAlignment or NoAlignment",
+    caseAlignment :: w ::: (Alignment <@> 'Persistant) <#> "c" <!> "PrimaryAlignment" <?> "The alignment style for case expressions: PrimaryAlignment or NoAlignment",
+    inPlace :: w ::: (Bool <@> 'Ephemeral) <#> "i" <!> "false" <?> "edit files in place",
+    version :: w ::: (Bool <@> 'Ephemeral) <#> "v" <!> "false" <?> "hattier version",
+    defaultConfig :: w ::: (Bool <@> 'Ephemeral) <#> "d" <!> "false" <?> "Print out the default configuration file"
   }
   deriving (Generic)
 
