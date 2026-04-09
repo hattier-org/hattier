@@ -3,11 +3,15 @@ module Hattier.Printer.Expression (printExpr) where
 import Control.Monad.RWS
 import Data.Text (Text)
 import Data.Text qualified as T
+import Data.List (transpose)
 import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
 import Hattier.Types
+
+data FlatPat = FlatCon Text [Text]
+             | FlatOther Text
 
 printExpr :: HsExpr GhcPs -> Hattier
 printExpr (HsCase _ scrut mg) = printCaseExpr scrut mg
@@ -28,25 +32,25 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
     [] -> pure ()
     (x : xs) -> case style of
       PrimaryAlignment -> do
-        let widths = map matchPatWidth matches
-            maxWidth = maximum widths
-        printAltAlign ind maxWidth x
-        mapM_ (\m -> newline >> printAltAlign ind maxWidth m) xs
+        let flats = map flattenMatch matches
+            cols = collectCols flats
+            widths = maxWidths cols
+        printAltAlign ind widths x
+        mapM_ (\m -> newline >> printAltAlign ind widths m) xs
       NoAlignment -> do
         printAltNoAlign ind x
         mapM_ (\m -> newline >> printAltNoAlign ind m) xs
 
-printAltAlign :: Text -> Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
-printAltAlign ind maxWidth alt@(L _ Match {m_pats = pats, m_grhss = grhss}) = do
+printAltAlign :: Text -> [Int] -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
+printAltAlign ind widths alt@(L _ Match {m_pats = pats, m_grhss = grhss}) = do
   case pats of
     [] -> fallback
     _ -> do
-      let patTxt = T.intercalate " " (map pprText pats)
-          padding = T.replicate (maxWidth - T.length patTxt) " "
+      let flat = flattenMatch alt
+          patTxt = renderFlat widths flat
 
       append ind
       append patTxt
-      append padding
       append " -> "
 
       case grhss of
@@ -80,6 +84,30 @@ printAltNoAlign ind alt@(L _ Match {m_pats = pats, m_grhss = grhss}) = do
       append ind
       append (pprText alt)
 
-matchPatWidth :: LMatch GhcPs (LHsExpr GhcPs) -> Int
-matchPatWidth (L _ Match {m_pats = [pat]}) = patWidth pat
-matchPatWidth _ = 0
+flattenMatch :: LMatch GhcPs (LHsExpr GhcPs) -> FlatPat
+flattenMatch (L _ Match {m_pats = [pat]}) = flattenPat pat
+flattenMatch m = FlatOther (pprText m)
+
+renderFlat :: [Int] -> FlatPat -> Text
+renderFlat widths (FlatCon name args) =
+  let cols = name : args
+      padded = zipWith (\txt w -> txt <> T.replicate (w - T.length txt) " ") cols widths
+   in T.intercalate " " padded
+renderFlat _ (FlatOther txt) = txt
+
+maxWidths :: [[Text]] -> [Int]
+maxWidths cols = map (maximum . map T.length) (transpose cols)
+
+flattenPat :: LPat GhcPs -> FlatPat
+flattenPat (L _ pat) =
+  case pat of
+    ConPat _ (L _ name) (PrefixCon _ args) ->
+      FlatCon
+        (pprText name)
+        (map (pprText . unLoc) args)
+    _ ->
+      FlatOther (pprText pat)
+
+collectCols :: [FlatPat] -> [[Text]]
+collectCols pats = [ name : args
+                   | FlatCon name args <- pats ]
