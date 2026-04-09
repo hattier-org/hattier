@@ -1,7 +1,7 @@
 module Main where
 
 import Integration qualified as Integration (tests)
-import Test.Tasty (TestTree, defaultMainWithIngredients, defaultIngredients, testGroup)
+import Test.Tasty (TestTree, defaultIngredients, defaultMainWithIngredients, testGroup)
 import Test.Tasty.CoverageReporter (coverageReporter)
 import Unit.Format qualified as Format (tests)
 import Unit.Parser qualified as Parser (tests)
