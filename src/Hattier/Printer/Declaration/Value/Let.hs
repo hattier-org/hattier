@@ -10,6 +10,7 @@ import GHC.Hs
 import GHC.Types.SrcLoc
 import Hattier.Config
 import Hattier.Printer.Combinators
+import Hattier.Printer.Declaration.Value.Guard
 import Hattier.Printer.Expression
 import Hattier.Types
 
@@ -33,7 +34,7 @@ printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
       let alignCol = bindAlignCol bindList
       append "let "
       printBinds bindInd alignCol bindList
-      newline >> append inInd >> append "in " >> printLetBody (unLoc body)
+      newline >> append inInd >> append "in  " >> printLetBody (unLoc body)
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
   indW <- asks (fromIntegral . indentWidth . cfg)
@@ -52,24 +53,33 @@ printLetExpr localBinds body = do
 printBinds :: T.Text -> Int -> [LHsBind GhcPs] -> Hattier
 printBinds _ _ [] = pure ()
 printBinds ind alignCol (b : bs) = do
-  printBind alignCol b
-  mapM_ (\bind -> newline >> append ind >> printBind alignCol bind) bs
+  printBind ind alignCol b
+  mapM_ (\bind -> newline >> append ind >> printBind ind alignCol bind) bs
 
 -- | Print a single binding, padding the name to @alignCol@ columns.
 -- When @alignCol = 0@ no padding is added.
-printBind :: Int -> LHsBind GhcPs -> Hattier
-printBind alignCol (L _ (FunBind _ lname mg)) = do
+printBind :: T.Text -> Int -> LHsBind GhcPs -> Hattier
+printBind bindInd alignCol (L _ (FunBind _ lname mg)) = do
   let name = pprText $ unLoc lname
   let padding = T.replicate (max 0 (alignCol - T.length name)) " "
-  append name >> append padding >> append " = "
+  append name >> append padding
   case unLoc (mg_alts mg) of
-    [L _ (Match _ _ [] (GRHSs _ [L _ (GRHS _ [] body)] _))] ->
-      printLetBody (unLoc body)
-    -- Simple case: no patterns, no guards
-    _ ->
-      -- TODO: patterns and guards
-      append "..."
-printBind _ bind =
+    [L _ (Match _ _ pats (GRHSs _ grhsList _))] ->
+      case grhsList of
+        [L _ (GRHS _ [] body)] -> do
+          -- Unguarded: emit patterns then " = " then body
+          mapM_ (\p -> append " " >> append (pprText p)) pats
+          append " = "
+          printLetBody (unLoc body)
+        _ -> do
+          -- Guarded: emit patterns then each guard on its own line
+          mapM_ (\p -> append " " >> append (pprText p)) pats
+          mapM_ (\grhs -> newline >> printGuard bindInd printLetBody grhs) grhsList
+    -- Empty or multi-clause let bindings are not valid Haskell and
+    -- cannot be produced by GHC's parser, so these branches are unreachable.
+    -- still, we need to handle them to satisfy the type checker.
+    _ -> pure ()
+printBind _ _ bind =
   -- TODO: PatBind and other binding forms
   append $ pprText $ unLoc bind
 

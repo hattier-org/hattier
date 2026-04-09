@@ -41,6 +41,7 @@ library
     Hattier.Printer.Declaration.Signature.Type
     Hattier.Printer.Declaration.Value
     Hattier.Printer.Declaration.Value.Function
+    Hattier.Printer.Declaration.Value.Guard
     Hattier.Printer.Declaration.Value.Let
     Hattier.Printer.Expression
     Hattier.Types
@@ -77,9 +78,13 @@ test-suite hattier-test
   hs-source-dirs: test
   main-is:        Main.hs
   other-modules:
+    Integration
+    Integration.Helpers
+    Integration.Let
     Unit.Format
     Unit.Format.Case
     Unit.Format.Function
+    Unit.Format.Guard
     Unit.Format.Let
     Unit.Format.TypeSig
     Unit.Parser
