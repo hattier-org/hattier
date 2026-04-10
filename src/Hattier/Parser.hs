@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
+-- | Utilities for parsing Haskell source text into a GHC AST.
+--
+-- Wraps GHC's parser API to produce a 'HattierModule' from 'Text', hiding
+-- the low-level plumbing behind a simple 'Either'-based interface.
 module Hattier.Parser (parseTextToAST, defaultDiagOpts, defaultParserOpts, ParseTextToAstError (..)) where
 
 import Control.Exception (Exception)

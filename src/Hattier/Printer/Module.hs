@@ -1,3 +1,7 @@
+-- | Pretty-printer for Haskell module structure.
+--
+-- Handles the top-level layout of a module: the header and module name,
+-- export list, import declarations, and top-level declarations.
 module Hattier.Printer.Module (printModule) where
 
 import Control.Monad (when)
@@ -9,6 +13,7 @@ import Hattier.Printer.Combinators
 import Hattier.Printer.Declaration
 import Hattier.Types
 
+-- | Print a complete Haskell module: header, imports, and top-level declarations.
 printModule :: Hattier
 printModule = do
   printModHeader

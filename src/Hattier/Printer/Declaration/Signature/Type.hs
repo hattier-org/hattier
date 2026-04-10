@@ -1,3 +1,7 @@
+-- | Printer for Haskell type expressions within signatures.
+--
+-- Handles the full range of 'HsType' forms: type variables, function arrows,
+-- applications, tuples, lists, foralls, operators, and more.
 module Hattier.Printer.Declaration.Signature.Type
   ( printTypeSig,
   )
@@ -9,6 +13,7 @@ import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Types
 
+-- | Print a type signature of the form @name1, name2 :: type@.
 printTypeSig :: [LIdP GhcPs] -> LHsSigWcType GhcPs -> Hattier
 printTypeSig names (HsWC {hswc_body = L _ sig}) = do
   printNames names

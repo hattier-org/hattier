@@ -1,3 +1,4 @@
+-- | Printer for Haskell patterns within function and case clauses.
 module Hattier.Printer.Pattern where
 
 import GHC.Hs
@@ -5,6 +6,8 @@ import Hattier.Printer.Combinators
 import Hattier.Printer.Utils
 import Hattier.Types
 
+-- | Print a list of patterns, each preceded by a space and padded to its
+-- pre-computed maximum width for column alignment across clauses.
 -- The second tuple element represents the padding that should be
 -- added after the first tuple element. With NoAlignment, this
 -- should be 0.

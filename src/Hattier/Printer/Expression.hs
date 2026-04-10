@@ -1,3 +1,7 @@
+-- | Printer for Haskell expressions and right-hand sides.
+--
+-- Handles @case@ and @let@ expressions directly, and the guarded\/unguarded
+-- RHS forms that appear in both function clauses and case alternatives.
 module Hattier.Printer.Expression
   ( printExpr,
     printRHS,
@@ -17,8 +21,12 @@ import Hattier.Printer.Pattern
 import Hattier.Printer.Utils
 import Hattier.Types
 
+-- | The separator token that precedes a right-hand side body:
+-- @=@ for function\/let bindings ('EqualsSign'), @->@ for case alternatives ('ArrowSign').
 data RHSprefix = EqualsSign | ArrowSign
 
+-- | Print a Haskell expression. Handles @case@ and @let@ directly;
+-- falls back to 'ppr' for all other expression forms.
 printExpr :: HsExpr GhcPs -> Hattier
 printExpr (HsCase _ scrut mg) = printCaseExpr scrut mg
 printExpr (HsLet _ binds body) = printLetExpr binds body
