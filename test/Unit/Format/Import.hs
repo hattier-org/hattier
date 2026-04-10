@@ -44,7 +44,7 @@ printOneImport = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def 1
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 printImportList :: IO ()
@@ -89,7 +89,7 @@ printImportList = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def 1
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 printModuleWithImports :: IO ()
@@ -131,5 +131,5 @@ printModuleWithImports = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def 1
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState

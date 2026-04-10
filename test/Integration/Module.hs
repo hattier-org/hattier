@@ -1,7 +1,3 @@
--- Some disabled warnings to delete after recursive printing with indentation is implemented
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
-
 module Integration.Module
   ( tests,
   )
@@ -17,9 +13,7 @@ tests :: TestTree
 tests =
   testGroup
     "Module integration tests"
-    -- TODO: enable this test after recursive printing with indentation is implemented:
-    -- [testCase "PrimaryAlignment: correctly align a module with deep nesting" largeModuleWithNesting]
-    []
+    [testCase "PrimaryAlignment: correctly align a module with deep nesting" largeModuleWithNesting]
 
 largeModuleWithNesting :: IO ()
 largeModuleWithNesting = expected @=? runFullFormatter input
@@ -62,7 +56,7 @@ input =
       "      in pos",
       "  | otherwise =",
       "      let neg = case x of",
-      "            _ -> -x",
+      "            _ -> (- x)",
       "      in neg",
       "",
       "complex :: Int -> Int -> Int -> Int",
@@ -105,34 +99,34 @@ expected =
         "        in  a + y",
         "",
         "g :: [Int] -> Int",
-        "g []     = 0",
-        "g (x:xs) = let val  = case x of",
-        "                       0 -> 10",
-        "                       n -> n * 2",
-        "               rest = case xs of",
-        "                        [] -> 0",
-        "                        ys -> let inner = case y of",
-        "                                            _  -> length ys",
-        "                              in  inner",
-        "           in  val + rest",
+        "g []       = 0",
+        "g (x : xs) = let val  = case x of",
+        "                          0 -> 10",
+        "                          n -> n * 2",
+        "                 rest = case xs of",
+        "                          [] -> 0",
+        "                          ys -> let inner = case y of",
+        "                                              _ -> length ys",
+        "                                in  inner",
+        "             in  val + rest",
         "",
         "h :: Int -> Int",
-        "h x | x == 0    = 1",
-        "    | x > 0     = let pos = case x of",
-        "                              1 -> 1",
-        "                              n -> n * 2",
-        "                  in  pos",
+        "h x | x == 0 = 1",
+        "    | x > 0 = let pos = case x of",
+        "                          1 -> 1",
+        "                          n -> n * 2",
+        "              in  pos",
         "    | otherwise = let neg = case x of",
-        "                              _ -> (-x)",
+        "                              _ -> (- x)",
         "                  in  neg",
         "",
         "complex :: Int -> Int -> Int -> Int",
-        "complex a b c = let first = case a of",
-        "                             0 -> let innerA = case b of",
-        "                                                 0 -> 0",
-        "                                                 n -> n + 1",
-        "                                  in  innerA",
-        "                             x -> x",
+        "complex a b c = let first  = case a of",
+        "                               0 -> let innerA = case b of",
+        "                                                   0 -> 0",
+        "                                                   n -> n + 1",
+        "                                    in  innerA",
+        "                               x -> x",
         "                    second = case (b, c) of",
         "                               (0, _) -> 0",
         "                               (_, 0) -> let innerB = case a of",
@@ -140,11 +134,11 @@ expected =
         "                                                        n -> n",
         "                                         in  innerB",
         "                               (m, n) -> m + n",
-        "                    third = let t = case first of",
-        "                                      0 -> case second of",
-        "                                             0 -> 0",
-        "                                             k -> k",
-        "                                      x -> x + second",
-        "                            in  t",
+        "                    third  = let t = case first of",
+        "                                       0 -> case second of",
+        "                                              0 -> 0",
+        "                                              k -> k",
+        "                                       x -> x + second",
+        "                             in  t",
         "                in  first + second + third"
       ]

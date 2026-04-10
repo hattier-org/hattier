@@ -39,7 +39,6 @@ printClause ::
     (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))) ->
   Hattier ()
 printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
-  ind <- askIndent
   append fname
   printPats (zip pats maxWidths)
-  printRHS ind grhss
+  printRHS grhss

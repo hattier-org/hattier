@@ -42,16 +42,15 @@ guardedFunc = expectedOutput @=? actualOutput
           [ "module Example where",
             "",
             "classify :: Int -> String",
-            "classify x",
-            "  | x < 0 = \"negative\"",
-            "  | x == 0 = \"zero\"",
-            "  | otherwise = \"positive\""
+            "classify x | x < 0 = \"negative\"",
+            "           | x == 0 = \"zero\"",
+            "           | otherwise = \"positive\""
           ]
     source =
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def 1
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 -- | A function with guarded clauses and two pattern arguments; PrimaryAlignment
@@ -74,13 +73,12 @@ guardedFuncWithPats = expectedOutput @=? actualOutput
           [ "module Example where",
             "",
             "safeDiv :: Int -> Int -> Int",
-            "safeDiv x y",
-            "  | y == 0 = 0",
-            "  | otherwise = x `div` y"
+            "safeDiv x y | y == 0 = 0",
+            "            | otherwise = x `div` y"
           ]
     source =
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def 1
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState

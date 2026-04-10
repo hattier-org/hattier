@@ -6,7 +6,6 @@ module Hattier.Printer.Expression
 where
 
 import Control.Monad.RWS
-import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Data.Bag (bagToList)
 import GHC.Hs
@@ -26,24 +25,25 @@ printExpr expr = fallback expr
 
 printCaseExpr :: LHsExpr GhcPs -> MatchGroup GhcPs (LHsExpr GhcPs) -> Hattier ()
 printCaseExpr scrut (MG _ (L _ matches)) = do
+  anch <- newAnchor
+  style <- asks (caseAlignment . cfg)
+  let widths = map matchWidth matches
+      maxWidth = computeAlignment style widths
+
   append "case "
   printExpr (unLoc scrut)
   append " of"
   newline
 
-  ind <- askIndent
-  style <- asks (caseAlignment . cfg)
-
-  let widths = map matchWidth matches
-      maxWidth = computeAlignment style widths
-
-  withSep newline $ map (printAlt ind maxWidth) matches
+  withAnchor anch $ withSep newline $ map (printAlt maxWidth) matches
 
 -- With NoAlignment, maxWidth should be 0
-printAlt :: Text -> Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier ()
-printAlt ind maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
+printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier ()
+printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
+  anch <- asks currentAnchor
+  indentTo anch
+
   let patTxt = T.intercalate " " (map pprText pats)
-  append ind
   append $ padTo maxWidth patTxt
   append " -> "
 
@@ -51,7 +51,7 @@ printAlt ind maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
     GRHSs _ [L _ (GRHS _ [] body)] _ ->
       printExpr (unLoc body)
     GRHSs _ xs _ ->
-      printGRHS ind xs
+      withAnchor anch $ printGRHS xs
 
 -- * let expressions
 
@@ -60,46 +60,41 @@ printAlt ind maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
 printLetExpr :: HsLocalBinds GhcPs -> LHsExpr GhcPs -> Hattier ()
 printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
   style <- asks (letAlignment . cfg)
-  ind <- askIndent
-  bindInd <- askIndentPlus 4
+  startCol <- gets currentColumn
   let bindList = bagToList binds
       alignCol = computeAlignment style (map nameLen bindList)
+      anch = startCol + 4 -- length "let " == 4
   append "let "
-  printBinds bindInd alignCol bindList
-  newline >> append ind >> append "in  " >> printExpr (unLoc body)
+
+  withAnchor anch $ withSep (newline >> indentTo anch) $ map (printBind alignCol) bindList
+
+  newline
+  indentTo startCol
+  append "in  "
+  printExpr (unLoc body)
 printLetExpr localBinds body = do
   -- TODO: HsIPBinds and EmptyLocalBinds cases
-  ind <- askIndent
   fallback localBinds
-  newline >> append ind >> append "in  " >> printExpr (unLoc body)
-
--- | Print a list of bindings multi-line, using @alignCol@ for padding.
--- Pass @alignCol = 0@ for no alignment.
---
---   let x        = 1   -- PrimaryAlignment (alignCol = 8)
---       longName = 2
---
---   let x = 1          -- NoAlignment (alignCol = 0)
---       longName = 2
-printBinds :: Text -> Int -> [LHsBind GhcPs] -> Hattier ()
-printBinds ind alignCol binds =
-  withSep (newline >> append ind) $ map (printBind ind alignCol) binds
+  newline
+  append "in  "
+  printExpr (unLoc body)
 
 -- | Print a single binding, padding the name to @alignCol@ columns.
 -- When @alignCol = 0@ no padding is added.
-printBind :: Text -> Int -> LHsBind GhcPs -> Hattier ()
-printBind bindInd alignCol (L _ (FunBind _ lname mg)) = do
+printBind :: Int -> LHsBind GhcPs -> Hattier ()
+printBind alignCol (L _ (FunBind _ lname mg)) = do
   let name = pprText $ unLoc lname
   append $ padTo alignCol name
+
   case unLoc (mg_alts mg) of
     [L _ Match {m_pats = pats, m_grhss = grhss}] -> do
       printPats (zip pats (repeat 0))
-      printRHS bindInd grhss
+      printRHS grhss
     -- Empty or multi-clause let bindings are not valid Haskell and
     -- cannot be produced by GHC's parser, so these branches are unreachable.
     -- still, we need to handle them to satisfy the type checker.
     _ -> pure ()
-printBind _ _ bind =
+printBind _ bind =
   -- TODO: PatBind and other binding forms
   fallback (unLoc bind)
 
@@ -108,26 +103,27 @@ printBind _ _ bind =
 -- | Print the RHS of a function clause or let-binding.
 -- Handles the "= body" unguarded case (with special layout for let),
 -- and the "| guard = body" guarded case.
-printRHS :: Text -> GRHSs GhcPs (LHsExpr GhcPs) -> Hattier ()
-printRHS ind (GRHSs _ [L _ (GRHS _ [] body)] _) = do
-  case unLoc body of
-    HsLet _ binds letBody ->
-      append " =" >> newline >> append ind >> printLetExpr binds letBody
-    _ -> append " = " >> printExpr (unLoc body)
-printRHS ind (GRHSs _ grhsList _) =
-  printGRHS ind grhsList
+printRHS :: GRHSs GhcPs (LHsExpr GhcPs) -> Hattier ()
+printRHS (GRHSs _ [L _ (GRHS _ [] body)] _) = do
+  append " = "
+  printExpr (unLoc body)
+printRHS (GRHSs _ grhsList _) = do
+  anch <- gets currentColumn
+  withAnchor anch $ printGRHS grhsList
 
 -- ** guarded RHS
 
-printGRHS :: Text -> [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier ()
-printGRHS ind grhss = mapM_ (\grhs -> newline >> printGuard ind grhs) grhss
+printGRHS :: [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier ()
+printGRHS grhss = do
+  anch <- asks currentAnchor
+  withSep (newline >> indentTo anch) $ map printGuard grhss
 
 -- | Print a single guarded RHS as @<ind>| <guards> = <body>@.
 -- The body printer is passed as a parameter to avoid a circular dependency
 -- between this module and the caller's body-printing logic.
-printGuard :: Text -> LGRHS GhcPs (LHsExpr GhcPs) -> Hattier ()
-printGuard ind (L _ (GRHS _ guards body)) = do
-  append ind >> append "| "
-  mapM_ (\g -> fallback g >> append " ") guards
-  append "= "
+printGuard :: LGRHS GhcPs (LHsExpr GhcPs) -> Hattier ()
+printGuard (L _ (GRHS _ guards body)) = do
+  append " | "
+  withSep (append " ") $ map fallback guards
+  append " = "
   printExpr (unLoc body)
