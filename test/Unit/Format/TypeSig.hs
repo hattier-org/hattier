@@ -40,7 +40,7 @@ runTypeSigTest input expected = expected @=? output
       case parseTextToAST input defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 0
     output = toStrict $ fst $ execHattier hattier env initialState
 
 printListFunc :: IO ()

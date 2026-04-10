@@ -79,6 +79,7 @@ test-suite hattier-test
   main-is:        Main.hs
   other-modules:
     Integration
+    Integration.Case
     Integration.Helpers
     Integration.Let
     Integration.Module

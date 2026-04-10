@@ -15,15 +15,17 @@ type HattierModule = HsModule GhcPs
 
 data Env = Env
   { ast :: HattierModule,
-    cfg :: Config Unwrapped
+    cfg :: Config Unwrapped,
+    currentAnchor :: Int -- The column that represents the current anchor to start printing from
   }
 
 data FormatterState = FormatterState
-  { builder :: Builder -- The rendered source code so far
+  { builder :: Builder, -- The rendered source code so far
+    currentColumn :: Int -- The column that the next printed item should be appended to
   }
 
 initialState :: FormatterState
-initialState = FormatterState {builder = mempty}
+initialState = FormatterState {builder = mempty, currentColumn = 0}
 
 execHattier :: Hattier -> Env -> FormatterState -> (Text, Log)
 execHattier hat env st =

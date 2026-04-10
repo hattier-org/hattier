@@ -48,10 +48,9 @@ letInFunctionBodyPrimary = expected @=? runFullFormatter letInFunctionBodySrc
             "greet :: Int -> String",
             "greet 0 = \"Hello\"",
             "greet 1 = \" INFOAFP\"",
-            "greet _ =",
-            "  let hello  = greet 0",
-            "      course = greet 1",
-            "  in  hello ++ course"
+            "greet _ = let hello  = greet 0",
+            "              course = greet 1",
+            "          in  hello ++ course"
           ]
 
 -- | funcAlignment=NoAlignment: patterns are not padded, but the let body
@@ -59,7 +58,7 @@ letInFunctionBodyPrimary = expected @=? runFullFormatter letInFunctionBodySrc
 letInFunctionBodyNoAlign :: IO ()
 letInFunctionBodyNoAlign = expected @=? runFullFormatterWith config letInFunctionBodySrc
   where
-    config = (def :: Config Unwrapped) {funcAlignment = NoAlignment}
+    config = (def :: Config Unwrapped) {letAlignment = NoAlignment}
     expected =
       T.init $
         T.unlines
@@ -68,8 +67,7 @@ letInFunctionBodyNoAlign = expected @=? runFullFormatterWith config letInFunctio
             "greet :: Int -> String",
             "greet 0 = \"Hello\"",
             "greet 1 = \" INFOAFP\"",
-            "greet _ =",
-            "  let hello  = greet 0",
-            "      course = greet 1",
-            "  in  hello ++ course"
+            "greet _ = let hello = greet 0",
+            "              course = greet 1",
+            "          in  hello ++ course"
           ]
