@@ -1,6 +1,6 @@
 # Hattier
 
-We format stuff.
+A Haskell formatter focused on vertical alignment and configurability. Written as part of a group assignment for the _Advanced Functional Programming_ course at Utrecht University.
 
 # Build Instructions
 
