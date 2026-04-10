@@ -19,14 +19,14 @@ import Hattier.Types
 
 data RHSprefix = EqualsSign | ArrowSign
 
-printExpr :: HsExpr GhcPs -> Hattier ()
+printExpr :: HsExpr GhcPs -> Hattier
 printExpr (HsCase _ scrut mg) = printCaseExpr scrut mg
 printExpr (HsLet _ binds body) = printLetExpr binds body
 printExpr expr = fallback expr
 
 -- * case expressions
 
-printCaseExpr :: LHsExpr GhcPs -> MatchGroup GhcPs (LHsExpr GhcPs) -> Hattier ()
+printCaseExpr :: LHsExpr GhcPs -> MatchGroup GhcPs (LHsExpr GhcPs) -> Hattier
 printCaseExpr scrut (MG _ (L _ matches)) = do
   style <- asks (caseAlignment . cfg)
   startCol <- gets currentColumn
@@ -43,7 +43,7 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
   withAnchor anch $ withSep newline $ map (printAlt maxWidth) matches
 
 -- With NoAlignment, maxWidth should be 0
-printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier ()
+printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
 printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   anch <- asks currentAnchor
   indentTo anch
@@ -57,7 +57,7 @@ printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
 
 -- | Pretty-print a @let ... in ...@ expression.
 -- The style is driven by 'letAlignment' in 'Config'.
-printLetExpr :: HsLocalBinds GhcPs -> LHsExpr GhcPs -> Hattier ()
+printLetExpr :: HsLocalBinds GhcPs -> LHsExpr GhcPs -> Hattier
 printLetExpr (HsValBinds _ (ValBinds _ binds _sigs)) body = do
   style <- asks (letAlignment . cfg)
   startCol <- gets currentColumn
@@ -81,7 +81,7 @@ printLetExpr localBinds body = do
 
 -- | Print a single binding, padding the name to @alignCol@ columns.
 -- When @alignCol = 0@ no padding is added.
-printBind :: Int -> LHsBind GhcPs -> Hattier ()
+printBind :: Int -> LHsBind GhcPs -> Hattier
 printBind alignCol (L _ (FunBind _ lname mg)) = do
   let name = pprText $ unLoc lname
   append $ padTo alignCol name
@@ -103,7 +103,7 @@ printBind _ bind =
 -- | Print the RHS of a function clause or let-binding.
 -- Handles the "= body" unguarded case (with special layout for let),
 -- and the "| guard = body" guarded case.
-printRHS :: RHSprefix -> GRHSs GhcPs (LHsExpr GhcPs) -> Hattier ()
+printRHS :: RHSprefix -> GRHSs GhcPs (LHsExpr GhcPs) -> Hattier
 printRHS prefix (GRHSs _ [L _ (GRHS _ [] body)] _) = do
   append $ case prefix of
     EqualsSign -> " = "
@@ -115,7 +115,7 @@ printRHS prefix (GRHSs _ grhsList _) = do
 
 -- ** guarded RHS
 
-printGRHS :: RHSprefix -> [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier ()
+printGRHS :: RHSprefix -> [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier
 printGRHS prefix grhss = do
   anch <- asks currentAnchor
   withSep (newline >> indentTo anch) $ map (printGuard prefix) grhss
@@ -123,7 +123,7 @@ printGRHS prefix grhss = do
 -- | Print a single guarded RHS as @<ind>| <guards> = <body>@.
 -- The body printer is passed as a parameter to avoid a circular dependency
 -- between this module and the caller's body-printing logic.
-printGuard :: RHSprefix -> LGRHS GhcPs (LHsExpr GhcPs) -> Hattier ()
+printGuard :: RHSprefix -> LGRHS GhcPs (LHsExpr GhcPs) -> Hattier
 printGuard prefix (L _ (GRHS _ guards body)) = do
   append " | "
   withSep (append " ") $ map fallback guards

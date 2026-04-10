@@ -7,7 +7,7 @@ import GHC.Hs (GhcPs, HsModule)
 import Hattier.Config
 import Options.Generic hiding (Text)
 
-type Hattier = RWS Env Log FormatterState
+type Hattier = RWS Env Log FormatterState ()
 
 type Log = [Text]
 
@@ -27,7 +27,7 @@ data FormatterState = FormatterState
 initialState :: FormatterState
 initialState = FormatterState {builder = mempty, currentColumn = 0}
 
-execHattier :: Hattier a -> Env -> FormatterState -> (Text, Log)
+execHattier :: Hattier -> Env -> FormatterState -> (Text, Log)
 execHattier hat env st =
   let (finalState, logs) = execRWS hat env st
    in (toLazyText (builder finalState), logs)
