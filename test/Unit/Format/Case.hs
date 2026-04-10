@@ -27,9 +27,9 @@ alignSimpleCase = expectedOutput @=? actualOutput
           [ "module Example where",
             "",
             "f x = case x of",
-            "        A   -> 1",
-            "        BBB -> 2",
-            "        C   -> 3"
+            "        A    -> 1",
+            "        BBB  -> 2",
+            "        C    -> 3"
           ]
     input =
       T.unlines
@@ -52,9 +52,9 @@ noAlignSimpleCase = expectedOutput @=? actualOutput
           [ "module Example where",
             "",
             "f x = case x of",
-            "        A -> 1",
-            "        BBB -> 2",
-            "        C -> 3"
+            "        A  -> 1",
+            "        BBB  -> 2",
+            "        C  -> 3"
           ]
     input =
       T.unlines

@@ -11,6 +11,7 @@ module Hattier.Printer.Expression
 where
 
 import Control.Monad.RWS
+import Data.List (transpose)
 import Data.Text qualified as T
 import GHC.Data.Bag (bagToList)
 import GHC.Hs
@@ -41,8 +42,10 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
   style <- asks (caseAlignment . cfg)
   startCol <- gets currentColumn
   indW <- asks (fromIntegral . indentWidth . cfg)
-  let widths = map matchWidth matches
-      maxWidth = computeAlignment style widths
+  let patMatrix = [concatMap patTokens pats | L _ Match {m_pats = pats} <- matches]
+      colWidths = computeColumnAlignments style (map (map T.length) (transpose patMatrix))
+      lhsWidths = map (\tokens -> sum (zipWith (\tok w -> max w (T.length tok)) tokens (colWidths ++ repeat 0)) + length tokens) patMatrix
+      maxLhsWidth = computeAlignment style lhsWidths
       anch = startCol + indW
 
   append "case "
@@ -50,18 +53,28 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
   append " of"
   newline
 
-  withAnchor anch $ withSep newline $ map (printAlt maxWidth) matches
+  withAnchor anch $ withSep newline $ map (printAlt colWidths maxLhsWidth) matches
 
 -- | Print a single case alternative, indenting to the current anchor and
 -- padding the pattern to @maxWidth@ columns before printing the RHS.
 -- With NoAlignment, maxWidth should be 0
-printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
-printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
+printAlt :: [Int] -> Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
+printAlt colWidths maxLhsWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   anch <- asks currentAnchor
   indentTo anch
+  start <- gets currentColumn
+  let tokens = concatMap patTokens pats
 
-  let patTxt = T.intercalate " " (map pprText pats)
-  append $ padTo maxWidth patTxt
+  -- print tokens with column alignment
+  sequence_ $
+    zipWith
+      (\tok w -> append (padTo w tok) >> append " ")
+      tokens
+      (colWidths ++ repeat 0)
+
+  end <- gets currentColumn
+  let printedWidth = end - start
+  append (T.replicate (max 0 (maxLhsWidth - printedWidth)) " ")
 
   printRHS ArrowSign grhss
 
@@ -145,3 +158,7 @@ printGuard prefix (L _ (GRHS _ guards body)) = do
     EqualsSign -> " = "
     ArrowSign -> " -> "
   printExpr (unLoc body)
+
+-- | Break a pattern into whitespace-separated tokens.
+patTokens :: LPat GhcPs -> [T.Text]
+patTokens pat = T.words (pprText pat)

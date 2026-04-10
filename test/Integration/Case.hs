@@ -35,11 +35,11 @@ expected =
   T.init $
     T.unlines $
       [ "f x y = case x of",
-        "          2147483647      -> \"A perfect number!\"",
-        "          NicePattern bro | bro < y -> case bro * y > 200 of",
-        "                                         True               -> undefined",
-        "                                         wayTooLongNameHere | not $ null wayTooLongNameHere -> \"nice\"",
-        "                          | bro == 0 -> let var = map func [1 .. 120]",
-        "                                        in  concatMap numToChar var",
-        "          nope            -> error \"nope\""
+        "          2147483647       -> \"A perfect number!\"",
+        "          NicePattern bro  | bro < y -> case bro * y > 200 of",
+        "                                          True                -> undefined",
+        "                                          wayTooLongNameHere  | not $ null wayTooLongNameHere -> \"nice\"",
+        "                           | bro == 0 -> let var = map func [1 .. 120]",
+        "                                         in  concatMap numToChar var",
+        "          nope             -> error \"nope\""
       ]

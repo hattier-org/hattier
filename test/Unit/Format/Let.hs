@@ -183,8 +183,8 @@ letBindingWithCase = expected @=? runLetPrinter PrimaryAlignment src
       T.init $
         T.unlines $
           [ "let g x = case x of",
-            "            0 -> True",
-            "            _ -> False",
+            "            0  -> True",
+            "            _  -> False",
             "in  g 5"
           ]
 
