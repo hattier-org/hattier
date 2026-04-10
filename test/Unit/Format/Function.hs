@@ -57,7 +57,7 @@ alignSimpleModule = expectedOutput @=? actualOutput
       case parseTextToAST testInput1 defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 dontAlignSimpleModule :: IO ()
@@ -77,7 +77,7 @@ dontAlignSimpleModule = expectedOutput @=? actualOutput
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
     config = (def :: Config Unwrapped) {funcAlignment = NoAlignment}
-    env = Env source config
+    env = Env source config 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 alignListFunc :: IO ()
@@ -104,7 +104,7 @@ alignListFunc = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 alignTupleFunc :: IO ()
@@ -132,5 +132,5 @@ alignTupleFunc = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 0
     actualOutput = toStrict $ fst $ execHattier hattier env initialState

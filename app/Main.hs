@@ -58,7 +58,7 @@ main = do
       pure (src, TL.putStrLn)
 
   ast' <- either throwIO pure $ parseTextToAST source defaultParserOpts
-  let env = Env ast' config
+  let env = Env ast' config 0
 
   --------------
   --- Format ---
