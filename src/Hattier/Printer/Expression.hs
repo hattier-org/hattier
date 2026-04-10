@@ -34,6 +34,8 @@ printExpr expr = fallback expr
 
 -- * case expressions
 
+-- | Print a @case@ expression: the scrutinee followed by @of@ and the
+-- indented list of alternatives, aligned according to 'caseAlignment'.
 printCaseExpr :: LHsExpr GhcPs -> MatchGroup GhcPs (LHsExpr GhcPs) -> Hattier
 printCaseExpr scrut (MG _ (L _ matches)) = do
   style <- asks (caseAlignment . cfg)
@@ -50,6 +52,8 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
 
   withAnchor anch $ withSep newline $ map (printAlt maxWidth) matches
 
+-- | Print a single case alternative, indenting to the current anchor and
+-- padding the pattern to @maxWidth@ columns before printing the RHS.
 -- With NoAlignment, maxWidth should be 0
 printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
 printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
@@ -123,6 +127,8 @@ printRHS prefix (GRHSs _ grhsList _) = do
 
 -- ** guarded RHS
 
+-- | Print a list of guarded RHS branches, each re-indented to the current
+-- anchor column.
 printGRHS :: RHSprefix -> [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier
 printGRHS prefix grhss = do
   anch <- asks currentAnchor

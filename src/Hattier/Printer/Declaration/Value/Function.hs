@@ -37,6 +37,8 @@ printFunBind name matches = do
 
   withSep newline $ map (printClause fname maxWidths) matches
 
+-- | Print a single function clause: the function name, its patterns (padded
+-- to the pre-computed @maxWidths@), and its right-hand side.
 printClause ::
   Text ->
   [Int] ->

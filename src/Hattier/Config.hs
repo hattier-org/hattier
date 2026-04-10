@@ -83,15 +83,21 @@ instance Default (Config Unwrapped) where
 ----------------------------------------
 --- Generic Merging of record fields ---
 ----------------------------------------
+
 -- | Merge three 'Config'-shaped values: defaults, a base (e.g. from a config
 -- file), and flag overrides (from the CLI). A flag value takes precedence over
 -- the base only when it differs from the default.
 class MergeFlags a where
+  -- | Merge defaults, a base config, and CLI flag overrides into a single
+  -- resolved 'Config'. See the class description for the precedence rules.
   mergeFlags :: a -> a -> a -> a
   default mergeFlags :: (Generic a, GMerge (Rep a)) => a -> a -> a -> a
   mergeFlags dflt base flags = to (gmerge (from dflt) (from base) (from flags))
 
+-- | Generic representation of 'MergeFlags'. Drives the default implementation
+-- by recursing over the product structure of a 'Generic' record.
 class GMerge f where
+  -- | Merge three generic representation values field-by-field.
   gmerge :: f p -> f p -> f p -> f p
 
 instance (GMerge f) => GMerge (M1 i c f) where
