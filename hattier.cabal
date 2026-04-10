@@ -78,7 +78,6 @@ test-suite hattier-test
   hs-source-dirs: test
   main-is:        Main.hs
   other-modules:
-    Integration
     Integration.Case
     Integration.Helpers
     Integration.Let

@@ -2,6 +2,41 @@
 
 We format stuff.
 
+# Build Instructions
+
+The project should be easily buildable via `cabal build`.  
+If that is not the case, please ensure you have GHC 9.10.3 installed.  
+GHC versions can easily be installed and managed by [GHCup](https://www.haskell.org/ghcup).  
+Alternatively, Nix can also be used as apt configuration files are present in the repository.
+
+# Project Directory Structure
+
+```
+hattier/
+├── app/Main.hs                  # The command-line interface.
+├── src/                         # The Hattier library's source code.
+│   ├── Hattier.hs               # The top-level module, exporting all of Hattier's functionality.
+│   └── Hattier/                 # The top-level directory, containing the key modules.
+│       ├── Config.hs            # The fully-generic configuration.
+│       ├── Format.hs            # Plain module, which exposes the top-level formatting function.
+│       ├── Parser.hs            # Responsible for parsing Haskell source code via GHC's own parser.
+│       ├── Types.hs             # Hattier's monad stack.
+│       └── Printer/             # All core formatting and printing functionality, logically separated into individual modules.
+│           └── [..]             # Formatting modules, separated logically into small composable pieces.
+├── test/                        # Hattier's test suite
+│   ├── Main.hs                  # Top-level module, that runs all tests
+│   ├── Unit/                    # Small per-module unit tests for individual functionality
+│   ├── Integration/             # Integration tests on the whole application
+│   └── Property/                # Property-based tests with quickcheck
+├── data/examples/               # Small examples to let you quickly test out Hattier!
+├── README.md                    # The file you are reading right now!
+├── hattier.dhall                # A sample configuration file we use ourselves at Hattier.
+├── hattier.cabal                # The cabal-install specification for this package.
+├── cabal.project                # Project-specific options we use at Hattier.
+└── [.env|flake.nix|flake.lock]  # Nix-relevant files.
+```
+
+
 # Contributing
 
 > [!IMPORTANT]
