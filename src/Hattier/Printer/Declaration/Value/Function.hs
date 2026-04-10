@@ -41,4 +41,4 @@ printClause ::
 printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
   append fname
   printPats (zip pats maxWidths)
-  printRHS grhss
+  printRHS EqualsSign grhss

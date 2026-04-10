@@ -36,12 +36,6 @@ withSep sep (x : xs) = x >> mapM_ (sep >>) xs
 fallback :: (Outputable a) => a -> Hattier ()
 fallback a = tell ["fallback: ", TL.show (pprText a), "\n"] >> (append . pprText) a
 
-newAnchor :: Hattier Int
-newAnchor = do
-  current <- gets currentColumn
-  indW <- asks (fromIntegral . indentWidth . cfg)
-  pure $ current + indW
-
 -- | Append an anchor for a given 'Hattier' context. This is the
 -- only function that should change @currentAnchor@
 withAnchor :: Int -> Hattier a -> Hattier a
