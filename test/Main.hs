@@ -1,12 +1,13 @@
 module Main where
 
 import Integration qualified as Integration (tests)
-import Test.Tasty (TestTree, defaultMain, testGroup)
+import Test.Tasty (TestTree, defaultIngredients, defaultMainWithIngredients, testGroup)
+import Test.Tasty.CoverageReporter (coverageReporter)
 import Unit.Format qualified as Format (tests)
 import Unit.Parser qualified as Parser (tests)
 
 main :: IO ()
-main = defaultMain tests
+main = defaultMainWithIngredients (coverageReporter : defaultIngredients) tests
 
 tests :: TestTree
 tests =
