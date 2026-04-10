@@ -1,3 +1,7 @@
+-- | Pretty-printer for Haskell module structure.
+--
+-- Handles the top-level layout of a module: the header and module name,
+-- export list, import declarations, and top-level declarations.
 module Hattier.Printer.Module (printModule) where
 
 import Control.Monad (when)
@@ -9,12 +13,15 @@ import Hattier.Printer.Combinators
 import Hattier.Printer.Declaration
 import Hattier.Types
 
+-- | Print a complete Haskell module: header, imports, and top-level declarations.
 printModule :: Hattier
 printModule = do
   printModHeader
   printModImports
   printModDecls
 
+-- | Print the module header (@module Foo.Bar where@), including the export
+-- list if one is present. Emits nothing when the module has no name.
 printModHeader :: Hattier
 printModHeader = do
   source <- asks ast
@@ -32,13 +39,17 @@ printModHeader = do
       newline
       newline
 
+-- | Append the string form of a 'ModuleName' to the output.
 printModName :: ModuleName -> Hattier
 printModName name = append (T.pack $ moduleNameString name)
 
+-- | Print the export list of a module. Currently a no-op.
 -- TODO: append exports nicely aligned
 printModExports :: XRec GhcPs [LIE GhcPs] -> Hattier
 printModExports _ = pure ()
 
+-- | Print all import declarations, separated by newlines. Emits a blank line
+-- after the imports block when top-level declarations follow.
 printModImports :: Hattier
 printModImports = do
   source <- asks ast
@@ -53,6 +64,8 @@ printModImports = do
         [] -> pure ()
         _ -> newline >> newline
 
+-- | Print a single import declaration, including the @qualified@ keyword,
+-- @as@ alias, and explicit import\/hiding list when present.
 printImport :: LImportDecl GhcPs -> Hattier
 printImport (L _ imp) = do
   append "import "
@@ -79,6 +92,9 @@ printImport (L _ imp) = do
       withSep (append ", ") $ map (fallback . unLoc) names
       append ")"
 
+-- | Print all top-level declarations. Inserts a single newline between a type
+-- signature and its value binding, and a blank line between all other adjacent
+-- declarations.
 printModDecls :: Hattier
 printModDecls = do
   source <- asks ast

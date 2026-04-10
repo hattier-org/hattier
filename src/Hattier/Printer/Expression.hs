@@ -1,3 +1,7 @@
+-- | Printer for Haskell expressions and right-hand sides.
+--
+-- Handles @case@ and @let@ expressions directly, and the guarded\/unguarded
+-- RHS forms that appear in both function clauses and case alternatives.
 module Hattier.Printer.Expression
   ( printExpr,
     printRHS,
@@ -17,8 +21,12 @@ import Hattier.Printer.Pattern
 import Hattier.Printer.Utils
 import Hattier.Types
 
+-- | The separator token that precedes a right-hand side body:
+-- @=@ for function\/let bindings ('EqualsSign'), @->@ for case alternatives ('ArrowSign').
 data RHSprefix = EqualsSign | ArrowSign
 
+-- | Print a Haskell expression. Handles @case@ and @let@ directly;
+-- falls back to 'ppr' for all other expression forms.
 printExpr :: HsExpr GhcPs -> Hattier
 printExpr (HsCase _ scrut mg) = printCaseExpr scrut mg
 printExpr (HsLet _ binds body) = printLetExpr binds body
@@ -26,6 +34,8 @@ printExpr expr = fallback expr
 
 -- * case expressions
 
+-- | Print a @case@ expression: the scrutinee followed by @of@ and the
+-- indented list of alternatives, aligned according to 'caseAlignment'.
 printCaseExpr :: LHsExpr GhcPs -> MatchGroup GhcPs (LHsExpr GhcPs) -> Hattier
 printCaseExpr scrut (MG _ (L _ matches)) = do
   style <- asks (caseAlignment . cfg)
@@ -42,6 +52,8 @@ printCaseExpr scrut (MG _ (L _ matches)) = do
 
   withAnchor anch $ withSep newline $ map (printAlt maxWidth) matches
 
+-- | Print a single case alternative, indenting to the current anchor and
+-- padding the pattern to @maxWidth@ columns before printing the RHS.
 -- With NoAlignment, maxWidth should be 0
 printAlt :: Int -> LMatch GhcPs (LHsExpr GhcPs) -> Hattier
 printAlt maxWidth (L _ Match {m_pats = pats, m_grhss = grhss}) = do
@@ -115,6 +127,8 @@ printRHS prefix (GRHSs _ grhsList _) = do
 
 -- ** guarded RHS
 
+-- | Print a list of guarded RHS branches, each re-indented to the current
+-- anchor column.
 printGRHS :: RHSprefix -> [LGRHS GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))] -> Hattier
 printGRHS prefix grhss = do
   anch <- asks currentAnchor

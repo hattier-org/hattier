@@ -1,3 +1,7 @@
+-- | Printer for Haskell type expressions within signatures.
+--
+-- Handles the full range of 'HsType' forms: type variables, function arrows,
+-- applications, tuples, lists, foralls, operators, and more.
 module Hattier.Printer.Declaration.Signature.Type
   ( printTypeSig,
   )
@@ -9,12 +13,15 @@ import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Types
 
+-- | Print a type signature of the form @name1, name2 :: type@.
 printTypeSig :: [LIdP GhcPs] -> LHsSigWcType GhcPs -> Hattier
 printTypeSig names (HsWC {hswc_body = L _ sig}) = do
   printNames names
   append " :: "
   printHsSigType sig
 
+-- | Print a comma-separated list of names, as they appear on the left-hand
+-- side of a type signature.
 printNames :: [LIdP GhcPs] -> Hattier
 printNames [] = pure ()
 printNames [(L _ name)] = fallback name
@@ -23,6 +30,8 @@ printNames ((L _ name) : rest) = do
   append ", "
   printNames rest
 
+-- | Print a 'HsSigType', emitting the @forall@ binder if one is present
+-- before delegating the body to 'printLHsType'.
 printHsSigType :: HsSigType GhcPs -> Hattier
 printHsSigType (HsSig {sig_bndrs = outerForall, sig_body = body}) = do
   case outerForall of
@@ -35,6 +44,7 @@ printHsSigType (HsSig {sig_bndrs = outerForall, sig_body = body}) = do
 
   printLHsType body
 
+-- | Print a space-separated list of @forall@ type variable binders.
 printForallVars :: [LHsTyVarBndr Specificity (NoGhcTc GhcPs)] -> Hattier
 printForallVars [] = pure ()
 printForallVars (var : vars) = do
@@ -42,6 +52,8 @@ printForallVars (var : vars) = do
   append " "
   printForallVars vars
 
+-- | Print a located 'HsType', dispatching on every supported constructor.
+-- Falls back to 'ppr' for any form not yet handled explicitly.
 printLHsType :: LHsType GhcPs -> Hattier
 printLHsType (L _ ty) = case ty of
   HsTyVar _ _ (L _ name) -> fallback name
@@ -112,6 +124,8 @@ printLHsType (L _ ty) = case ty of
   -- XHsType _ -> undefined
   _ -> fallback ty
 
+-- | Print a comma-separated sequence of types, as found inside tuples,
+-- unboxed sums, and explicit type-level lists.
 printNestedStructure :: [LHsType GhcPs] -> Hattier
 printNestedStructure [] = pure ()
 printNestedStructure (t : ts) = do

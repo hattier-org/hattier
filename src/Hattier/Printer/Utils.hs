@@ -1,3 +1,7 @@
+-- | Utility functions for the Hattier printer.
+--
+-- Provides helpers for rendering GHC AST nodes to 'Text', computing alignment
+-- widths, and measuring the printed width of patterns and bindings.
 module Hattier.Printer.Utils where
 
 import Data.Text (Text)
@@ -16,17 +20,24 @@ pprText = T.pack . showSDocUnsafe . ppr
 padTo :: Int -> Text -> Text
 padTo n t = t <> T.replicate (max 0 (n - T.length t)) " "
 
+-- | Produce a 'Text' of @n@ space characters.
 indToText :: Int -> Text
 indToText n = T.replicate n " "
 
+-- | Given an 'Alignment' style and a list of item widths, return the target
+-- column width: the maximum width for 'PrimaryAlignment', or @0@ for 'NoAlignment'.
 computeAlignment :: Alignment -> [Int] -> Int
 computeAlignment PrimaryAlignment xs = maximum xs
 computeAlignment NoAlignment _ = 0
 
+-- | Like 'computeAlignment', but for a matrix of widths (one inner list per
+-- column position). Returns the per-column target widths.
 computeColumnAlignments :: Alignment -> [[Int]] -> [Int]
 computeColumnAlignments PrimaryAlignment cols = map maximum cols
 computeColumnAlignments NoAlignment cols = map (const 0) cols
 
+-- | Compute the printed character width of a pattern. Used to determine the
+-- padding needed to align patterns across function clauses or case alternatives.
 patWidth :: LPat GhcPs -> Int
 patWidth (L _ pat) =
   case pat of
@@ -60,10 +71,14 @@ patWidth (L _ pat) =
     EmbTyPat _ _ -> undefined -- ExplicitNamespaces and RequiredTypeArguments extensions
     InvisPat _ _ -> undefined -- TypeAbstractions extension
 
+-- | Compute the printed width of the single pattern in a single-pattern 'Match'.
+-- Returns @0@ for matches with zero or more than one pattern.
 matchWidth :: LMatch GhcPs (LHsExpr GhcPs) -> Int
 matchWidth (L _ Match {m_pats = [pat]}) = patWidth pat
 matchWidth _ = 0
 
+-- | Return the printed length of the name in a 'FunBind'. Used to compute
+-- alignment widths for let-binding names. Returns @0@ for non-'FunBind' forms.
 nameLen :: LHsBind GhcPs -> Int
 nameLen (L _ (FunBind _ lname _)) = T.length (pprText $ unLoc lname)
 nameLen _ = 0

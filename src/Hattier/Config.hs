@@ -8,6 +8,11 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 
+-- | Configuration types for Hattier and its command-line interface.
+--
+-- 'Config' holds all user-facing formatting options. 'CLI' wraps it with a
+-- positional file argument for the executable. 'MergeFlags' provides generic
+-- merging of a file-based config with CLI flag overrides.
 module Hattier.Config where
 
 import Data.Default (Default, def)
@@ -17,10 +22,14 @@ import Dhall.Marshal.Encode (ToDhall)
 import GHC.Generics
 import Options.Generic
 
+-- | The top-level CLI record: a 'Config' paired with an optional file path argument.
 data CLI = CLI (Config Wrapped) PosArg deriving (Generic)
 
+-- | The optional positional file path argument on the command line.
 newtype PosArg = PosArg (Maybe FilePath <?> "file name") deriving (Generic, ParseRecord)
 
+-- | All formatting options that Hattier supports. Parameterised by @w@ so the
+-- same record type can be used for both CLI-wrapped and fully-resolved values.
 data Config w = Config
   { indentWidth :: w ::: Natural <#> "w" <!> "2" <?> "The desired indentation width",
     letAlignment :: w ::: Alignment <#> "l" <!> "PrimaryAlignment" <?> "The alignment style for let-bindings: PrimaryAlignment or NoAlignment",
@@ -32,6 +41,7 @@ data Config w = Config
   }
   deriving (Generic)
 
+-- | Controls how declaration names or patterns are padded to achieve visual alignment.
 data Alignment
   = -- | Indent each binding uniformly, no padding
     NoAlignment
@@ -73,12 +83,21 @@ instance Default (Config Unwrapped) where
 ----------------------------------------
 --- Generic Merging of record fields ---
 ----------------------------------------
+
+-- | Merge three 'Config'-shaped values: defaults, a base (e.g. from a config
+-- file), and flag overrides (from the CLI). A flag value takes precedence over
+-- the base only when it differs from the default.
 class MergeFlags a where
+  -- | Merge defaults, a base config, and CLI flag overrides into a single
+  -- resolved 'Config'. See the class description for the precedence rules.
   mergeFlags :: a -> a -> a -> a
   default mergeFlags :: (Generic a, GMerge (Rep a)) => a -> a -> a -> a
   mergeFlags dflt base flags = to (gmerge (from dflt) (from base) (from flags))
 
+-- | Generic representation of 'MergeFlags'. Drives the default implementation
+-- by recursing over the product structure of a 'Generic' record.
 class GMerge f where
+  -- | Merge three generic representation values field-by-field.
   gmerge :: f p -> f p -> f p -> f p
 
 instance (GMerge f) => GMerge (M1 i c f) where

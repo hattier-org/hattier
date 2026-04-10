@@ -1,3 +1,7 @@
+-- | Printer for function binding declarations.
+--
+-- Handles multi-clause function definitions, computing per-column pattern
+-- alignment widths across all clauses before printing.
 module Hattier.Printer.Declaration.Value.Function
   ( printFunBind,
   )
@@ -16,6 +20,8 @@ import Hattier.Printer.Pattern
 import Hattier.Printer.Utils
 import Hattier.Types
 
+-- | Print a multi-clause function binding, aligning patterns across clauses
+-- according to the 'funcAlignment' setting in 'Config'.
 printFunBind ::
   RdrName ->
   [ GenLocated
@@ -31,6 +37,8 @@ printFunBind name matches = do
 
   withSep newline $ map (printClause fname maxWidths) matches
 
+-- | Print a single function clause: the function name, its patterns (padded
+-- to the pre-computed @maxWidths@), and its right-hand side.
 printClause ::
   Text ->
   [Int] ->
