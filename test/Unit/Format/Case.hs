@@ -72,5 +72,5 @@ runFormatter config input =
         case parseTextToAST input defaultParserOpts of
           Right ast' -> ast'
           Left err -> error $ "test fixture failed to parse: " <> show err
-      env = Env source config
+      env = Env source config 1
    in toStrict $ fst $ execHattier hattier env initialState

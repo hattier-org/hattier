@@ -12,5 +12,5 @@ import Hattier.Format
 import Hattier.Parser
 import Hattier.Types
 
-hattier :: Hattier
+hattier :: Hattier ()
 hattier = fmt

@@ -11,7 +11,7 @@ import Hattier.Types
 -- TODO: instead of simply printing the pattern with 'pprText', this
 -- function should also take account of maximum widths to align patterns
 -- within patterns like those inside tuples.
-printPats :: [(LPat GhcPs, Int)] -> Hattier
+printPats :: [(LPat GhcPs, Int)] -> Hattier ()
 printPats = mapM_ $ \(pat, maxWidth) -> do
   let patTxt = pprText pat
   append " " >> append (padTo maxWidth patTxt)

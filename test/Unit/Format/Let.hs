@@ -38,7 +38,7 @@ runLetPrinter style src =
         Left err -> error $ "parse error: " <> show err
       (binds, body) = extractLet m
       config = (def :: Config Unwrapped) {letAlignment = style}
-      env = Env m config
+      env = Env m config 1
    in fst (execHattier (printLetExpr binds body) env initialState)
 
 -- | Extract the @HsLocalBinds@ and body from the first let expression in a module.

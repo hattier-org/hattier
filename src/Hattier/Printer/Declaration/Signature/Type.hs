@@ -9,13 +9,13 @@ import GHC.Types.SrcLoc
 import Hattier.Printer.Combinators
 import Hattier.Types
 
-printTypeSig :: [LIdP GhcPs] -> LHsSigWcType GhcPs -> Hattier
+printTypeSig :: [LIdP GhcPs] -> LHsSigWcType GhcPs -> Hattier ()
 printTypeSig names (HsWC {hswc_body = L _ sig}) = do
   printNames names
   append " :: "
   printHsSigType sig
 
-printNames :: [LIdP GhcPs] -> Hattier
+printNames :: [LIdP GhcPs] -> Hattier ()
 printNames [] = pure ()
 printNames [(L _ name)] = fallback name
 printNames ((L _ name) : rest) = do
@@ -23,7 +23,7 @@ printNames ((L _ name) : rest) = do
   append ", "
   printNames rest
 
-printHsSigType :: HsSigType GhcPs -> Hattier
+printHsSigType :: HsSigType GhcPs -> Hattier ()
 printHsSigType (HsSig {sig_bndrs = outerForall, sig_body = body}) = do
   case outerForall of
     HsOuterImplicit {} -> pure ()
@@ -35,14 +35,14 @@ printHsSigType (HsSig {sig_bndrs = outerForall, sig_body = body}) = do
 
   printLHsType body
 
-printForallVars :: [LHsTyVarBndr Specificity (NoGhcTc GhcPs)] -> Hattier
+printForallVars :: [LHsTyVarBndr Specificity (NoGhcTc GhcPs)] -> Hattier ()
 printForallVars [] = pure ()
 printForallVars (var : vars) = do
   fallback var
   append " "
   printForallVars vars
 
-printLHsType :: LHsType GhcPs -> Hattier
+printLHsType :: LHsType GhcPs -> Hattier ()
 printLHsType (L _ ty) = case ty of
   HsTyVar _ _ (L _ name) -> fallback name
   HsAppTy _ f a -> do
@@ -112,7 +112,7 @@ printLHsType (L _ ty) = case ty of
   -- XHsType _ -> undefined
   _ -> fallback ty
 
-printNestedStructure :: [LHsType GhcPs] -> Hattier
+printNestedStructure :: [LHsType GhcPs] -> Hattier ()
 printNestedStructure [] = pure ()
 printNestedStructure (t : ts) = do
   printLHsType t

@@ -9,13 +9,13 @@ import Hattier.Printer.Combinators
 import Hattier.Printer.Declaration
 import Hattier.Types
 
-printModule :: Hattier
+printModule :: Hattier ()
 printModule = do
   printModHeader
   printModImports
   printModDecls
 
-printModHeader :: Hattier
+printModHeader :: Hattier ()
 printModHeader = do
   source <- asks ast
   -- only print a header if there is one
@@ -32,14 +32,14 @@ printModHeader = do
       newline
       newline
 
-printModName :: ModuleName -> Hattier
+printModName :: ModuleName -> Hattier ()
 printModName name = append (T.pack $ moduleNameString name)
 
 -- TODO: append exports nicely aligned
-printModExports :: XRec GhcPs [LIE GhcPs] -> Hattier
+printModExports :: XRec GhcPs [LIE GhcPs] -> Hattier ()
 printModExports _ = pure ()
 
-printModImports :: Hattier
+printModImports :: Hattier ()
 printModImports = do
   source <- asks ast
   case hsmodImports source of
@@ -53,7 +53,7 @@ printModImports = do
         [] -> pure ()
         _ -> newline >> newline
 
-printImport :: LImportDecl GhcPs -> Hattier
+printImport :: LImportDecl GhcPs -> Hattier ()
 printImport (L _ imp) = do
   append "import "
 
@@ -79,7 +79,7 @@ printImport (L _ imp) = do
       withSep (append ", ") $ map (fallback . unLoc) names
       append ")"
 
-printModDecls :: Hattier
+printModDecls :: Hattier ()
 printModDecls = do
   source <- asks ast
   -- splitting up these cases enables us to only put

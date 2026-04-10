@@ -21,5 +21,5 @@ runFullFormatterWith config src =
   let ast' = case parseTextToAST src defaultParserOpts of
         Right m -> m
         Left err -> error $ "parse error: " <> show err
-      env = Env ast' config
+      env = Env ast' config 1
    in T.Lazy.toStrict $ fst $ execHattier hattier env initialState

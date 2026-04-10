@@ -22,7 +22,7 @@ printFunBind ::
       SrcSpanAnnA
       (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs)))
   ] ->
-  Hattier
+  Hattier ()
 printFunBind name matches = do
   style <- asks (funcAlignment . cfg)
   let fname = pprText name
@@ -37,9 +37,9 @@ printClause ::
   GenLocated
     SrcSpanAnnA
     (Match GhcPs (GenLocated SrcSpanAnnA (HsExpr GhcPs))) ->
-  Hattier
+  Hattier ()
 printClause fname maxWidths (L _ Match {m_pats = pats, m_grhss = grhss}) = do
-  indW <- asks (fromIntegral . indentWidth . cfg)
+  ind <- askIndent
   append fname
   printPats (zip pats maxWidths)
-  printRHS (indToText indW) grhss
+  printRHS ind grhss

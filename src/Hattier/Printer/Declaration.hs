@@ -10,7 +10,7 @@ import Hattier.Printer.Declaration.Signature
 import Hattier.Printer.Declaration.Value
 import Hattier.Types
 
-printDecl :: LHsDecl GhcPs -> Hattier
+printDecl :: LHsDecl GhcPs -> Hattier ()
 printDecl (L _ (ValD _ bind)) = printValueDecl bind
 printDecl (L _ (SigD _ sig)) = printSignature sig
 printDecl decl = fallback decl

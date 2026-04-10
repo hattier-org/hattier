@@ -6,5 +6,5 @@ where
 import Hattier.Printer.Module
 import Hattier.Types
 
-fmt :: Hattier
+fmt :: Hattier ()
 fmt = printModule

@@ -51,7 +51,7 @@ guardedFunc = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 1
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
 
 -- | A function with guarded clauses and two pattern arguments; PrimaryAlignment
@@ -82,5 +82,5 @@ guardedFuncWithPats = expectedOutput @=? actualOutput
       case parseTextToAST testInput defaultParserOpts of
         Right ast' -> ast'
         Left err -> error $ "test fixture failed to parse: " <> show err
-    env = Env source def
+    env = Env source def 1
     actualOutput = toStrict $ fst $ execHattier hattier env initialState
